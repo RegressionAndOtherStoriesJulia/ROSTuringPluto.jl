@@ -3,7 +3,7 @@
 
 1. git commit -m "Tag v0.0.1: changes"
 2. git tag v0.0.1
-3. git push origin master --tags
+3. git push origin main --tags
 
 ### Cloning the repository
 
