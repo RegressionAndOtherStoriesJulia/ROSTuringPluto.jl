@@ -44,6 +44,4 @@ A Pluto page should open in a browser. See [this page](https://www.juliafordatas
 
 ## Usage
 
-Select a notebook in the `open a file` entry box, e.g. type `./` and step to the first notebook from the book. Type a '/' after selecting a chapter.
-
-The code examples are organized in subdirectories according to  chapter/section/example, e.g. `00 - ROSTuringGuide/ROSTuringGuide.jl`.
+Select a notebook in the `open a file` entry box, e.g. type `./` and step to the first chapter of the book. Type a '/' after selecting a chapter to see the next level (the actual notebooks in that chapter). 
