@@ -41,8 +41,7 @@ html"""
 md"###### Included Julia packages."
 
 # ╔═╡ 220d3576-d0da-4722-b020-bc6e99006194
-peace = CSV.read(ros_datadir("PeaceKeeping", "peacekeeping.csv"),
-	missingstring="NA", DataFrame)
+peace = CSV.read(ros_datadir("PeaceKeeping", "peacekeeping.csv"), missingstring="NA", DataFrame)
 
 # ╔═╡ 74190615-64d8-4d48-ba31-837a0910e88c
 describe(peace)
@@ -196,7 +195,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.9.0-DEV"
 manifest_format = "2.0"
-project_hash = "66a46dfc7740f7314c7f220a3fcc01c75bbe9d3c"
+project_hash = "22724109c3c371833c1603810456826f0d0e9c21"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
