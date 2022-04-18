@@ -29,6 +29,7 @@ To (locally) use this project, do the following:
 Select and download ROSTuringPluto.jl from [RegressionAndOtherStories on Github](https://github.com/RegressionAndOtherStoriesJulia/), e.g. to clone it to the `~/.julia/dev/ROSTuringPluto` directory:
 
 ```Julia
+$ cd ~/.julia/dev
 $ git clone https://github.com/RegressionAndOtherStoriesJulia/ROSTuringPluto.jl ROSTuringPluto
 $ cd ROSTuringPluto/notebooks # Move to the (downloaded) notebook directory
 $ julia # Start Julia REPL
@@ -44,4 +45,4 @@ A Pluto page should open in a browser. See [this page](https://www.juliafordatas
 
 ## Usage
 
-Select a notebook in the `open a file` entry box, e.g. type `./` and step to the first chapter of the book. Type a '/' after selecting a chapter to see the next level (the actual notebooks in that chapter). 
+Select a notebook in the `open a file` entry box, e.g. type `./` and select a chapter of the book. Type a '/' after selecting the chapter to see the next level (the actual notebooks in that chapter). 
