@@ -26,10 +26,10 @@ This project will take quite a while to complete, I expect at least a year. But 
 
 To (locally) use this project, do the following:
 
-Select and download ROSTuringPluto.jl from [RegressionAndOtherStories on Github](https://github.com/RegressionAndOtherStories/), e.g. to clone it to the `~/.julia/dev/ROSTuringPluto` directory:
+Select and download ROSTuringPluto.jl from [RegressionAndOtherStories on Github](https://github.com/RegressionAndOtherStoriesJulia/), e.g. to clone it to the `~/.julia/dev/ROSTuringPluto` directory:
 
 ```Julia
-$ git clone https://github.com/RegressionAndOtherStories/ROSTuringPluto.jl ROSTuringPluto
+$ git clone https://github.com/RegressionAndOtherStoriesJulia/ROSTuringPluto.jl ROSTuringPluto
 $ cd ROSTuringPluto/notebooks # Move to the (downloaded) notebook directory
 $ julia # Start Julia REPL
 ```
