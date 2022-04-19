@@ -7,9 +7,9 @@ using InteractiveUtils
 # ╔═╡ 5084b8f0-65ac-4704-b1fc-2a9008132bd7
 using Pkg, DrWatson
 
-# ╔═╡ f27de704-7bc0-4e11-ae4b-a18ee0097782
+# ╔═╡ f71640c9-3918-475e-b32b-c85424bbcf5e
 begin
-	# Common data files and functions (Once registered)
+	# Common data files and functions
 	using RegressionAndOtherStories
 	
 	# Specific to this notebook
@@ -17,25 +17,26 @@ begin
 
 	# Specific to ROSStanPluto
     using Turing
-	using Optim
 	using Logging
+	using Optim
 	
 	# Graphics related
-	using GLMakie
-    using AlgebraOfGraphics
-	set_aog_theme!()
+    using GLMakie
 
 	Logging.disable_logging(Logging.Warn);
 
 end
 
 # ╔═╡ 0391fc17-09b7-47d7-b799-6dc6de13e82b
-md"## Helicopters: helicopters.jl"
+md"### HDI: hdi.csv, votes.csv"
 
 # ╔═╡ eb7ea04a-da52-4e69-ac3e-87dc7f014652
-md"##### See Chapter 1.8 in Regression and Other Stories."
+md"##### See Chapter 2.1 in Regression and Other Stories."
 
-# ╔═╡ b95f0107-fdc3-4e90-95ef-b4ccb9bbf5b7
+# ╔═╡ d7543b63-52d3-449b-8ce3-d979c23f8b95
+md" ###### Widen the notebook."
+
+# ╔═╡ ed172871-fa4d-4111-ac0a-341898917948
 html"""
 <style>
 	main {
@@ -48,80 +49,155 @@ html"""
 """
 
 # ╔═╡ 4755dab0-d228-41d3-934a-56f2863a5652
-md"###### Included Julia packages."
+md"###### A typical set of Julia packages to include in notebooks."
 
-# ╔═╡ 74882014-7ec5-42c3-ac70-fd532d269ac4
-helicopters = CSV.read(ros_datadir("Helicopters", "helicopters.csv"), DataFrame)
+# ╔═╡ 6c2043f4-dcbd-4535-a5ae-61c109519879
+hdi = CSV.read(ros_datadir("HDI", "hdi.csv"), DataFrame)
 
-# ╔═╡ b1d5448e-7dc0-4d62-9f7f-cf5093fbcb71
-md" ##### Simulate 40 helicopters."
-
-# ╔═╡ a078b55c-d06a-4d1b-a9dd-b87963df3d6c
-begin
-	helis = DataFrame(width_cm = rand(Normal(5, 2), 40), length_cm = rand(Normal(10, 4), 40))
-	helis.time_sec = 0.5 .+ 0.04 .* helis.width_cm .+ 0.08 .* helis.length_cm .+ 0.1 .* rand(Normal(0, 1), 40)
-	helis
+# ╔═╡ d7b5bfec-3ca7-46fe-aed5-094ee266016b
+let
+	f = Figure()
+	ax = Axis(f[1, 1]; title = "HDI",
+		xlabel = "HDI rank of state", ylabel = "HDI index")
+	limits!(ax, 0, 60, 0.7, 1)
+	scatter!(hdi.rank, hdi.hdi)
+	selection = 1:20:50
+	scatter!(hdi.rank[selection], hdi.hdi[selection]; color=:darkred)
+	for i in selection
+		lines!([hdi.rank[i], hdi.rank[i] + 3], 
+			[hdi.hdi[i], hdi.hdi[i] + 0.015]; color=:grey)
+		annotations!(hdi.state[i], 
+			position = (hdi.rank[i] + 3, hdi.hdi[i] + 0.015),
+			textsize = 10)
+	end
+	selection = [4, 51]
+	scatter!(hdi.rank[selection], hdi.hdi[selection]; color=:darkred)
+	for i in selection
+		lines!([hdi.rank[i], hdi.rank[i] + 3], 
+			[hdi.hdi[i], hdi.hdi[i] - 0.015]; color=:grey)
+		annotations!(hdi.state[i], 
+			position = (hdi.rank[i] + 3, hdi.hdi[i] - 0.023),
+			textsize = 10)
+	end
+	selection = 45:3:50
+	scatter!(hdi.rank[selection], hdi.hdi[selection]; color=:darkred)
+	for i in selection
+		lines!([hdi.rank[i], hdi.rank[i] + 3], 
+			[hdi.hdi[i], hdi.hdi[i] + 0.015]; color=:grey)
+		annotations!(hdi.state[i], 
+			position = (hdi.rank[i] + 3, hdi.hdi[i] + 0.015),
+			textsize = 10)
+	end
+	f
 end
 
-# ╔═╡ b1ce6698-4ea4-4826-87bb-9b162d15fb26
-@model function ppl1_4(w, l, y)
-    a ~ Normal(10, 5)
+# ╔═╡ 2dd08df7-a6dd-4a19-a673-a98c43e4d552
+begin
+	votes = CSV.read(ros_datadir("HDI", "votes.csv"), DataFrame; 
+		delim=",", stringtype=String, pool=false)
+	votes[votes.st_year .== 2000, [:st_state, :st_stateabb, :st_income]]
+end
+
+# ╔═╡ c4d6df3e-3cc9-4588-84e6-fe7265f01027
+let
+	tmp = votes[votes.st_year .== 2000, [:st_state, :st_stateabb, :st_income]]
+	votes2 = DataFrame(state=tmp.st_state, abbr=tmp.st_stateabb,
+		income=tmp.st_income)
+	global hdivotes = innerjoin(hdi, votes2, on = :state)
+end
+
+# ╔═╡ 696eb9b0-f239-425b-8b71-802dfd9d8a42
+let
+	f = Figure()
+	ax = Axis(f[1, 1]; title = "HDI ~ income",
+		xlabel = "Average state income in 2000",
+		ylabel = "Human Development Index")
+	for i in 1:size(hdivotes, 1)
+		if length(hdivotes.abbr[i]) > 0
+			annotations!(hdivotes.abbr[i],
+				position = (hdivotes.income[i], hdivotes.hdi[i]),
+				textsize = 10)
+		end
+	end
+	hdivotes.rank_hdi = sortperm(hdivotes.hdi)
+	global hdivotes2 = sort(hdivotes, :income)
+	ax = Axis(f[1, 2]; title = "Ranked HDI ~ ranked income",
+		xlabel = "Rank of average state income in 2000",
+		ylabel = "Rank of Human Development Index")
+	for i in 1:size(hdivotes2, 1)
+		if length(hdivotes2.abbr[i]) > 0
+			annotations!(hdivotes2.abbr[i],
+				position = (i, hdivotes2.rank_hdi[i]),
+				textsize = 10)
+		end
+	end
+	
+	f
+end
+
+# ╔═╡ 1cebb5eb-0ae1-4ee4-bf0f-7695b653f721
+hdivotes2
+
+# ╔═╡ 77a71063-4a56-4578-845e-b85018ebd6a1
+@model function ppl2_1(inc, hdi)
+    a ~ Normal(0, 5)
     b ~ Normal(0, 5)
-	c ~ Normal(0, 5)
     σ ~ Exponential(1)
-    μ = a .+ b .* w .+ c .* l
-    for i in eachindex(y)
-        y[i] ~ Normal(μ[i], σ)
+    μ = a .+ b .* inc
+    for i in eachindex(hdi)
+        hdi[i] ~ Normal(μ[i], σ)
     end
 end
 
-# ╔═╡ 91552c30-cee6-45a3-b208-02b8e3347be5
+# ╔═╡ 43079a20-9ceb-4c6d-9848-db6e7487e6b3
 begin
-	m1_4t = ppl1_4(helis.width_cm, helis.length_cm, helis.time_sec)
-	post1_4t = sample(m1_4t, NUTS(), MCMCThreads(), 1000, 4)
-	post1_4t_df = DataFrame(post1_4t[[:a, :b, :c, :σ]])
-	plot_chains(post1_4t_df, [:a, :b, :c])
+	rank_income = collect(1:size(hdivotes2, 1))
+	rank_hdi = hdivotes2.rank_hdi
+	m2_1t = ppl2_1(rank_income, rank_hdi)
+	post2_1t = sample(m2_1t, NUTS(), MCMCThreads(), 1000, 4)
 end
 
-# ╔═╡ 8f825b88-b9ae-4cbf-b27f-946d6ef7c316
-	mod1_4t_sum = model_summary(post1_4t_df, [:a, :b, :c, :σ])
+# ╔═╡ a96a5658-33c6-4f73-8e5e-bb74b2e7fec1
+begin
+	post2_1t_df = DataFrame(post2_1t)
+	mod2_1t_sum = model_summary(post2_1t_df, [:a, :b, :σ])
+end
 
-# ╔═╡ 66c5408b-6a18-41e7-88ce-b3427a3961e1
+# ╔═╡ 9cf379d5-aac4-4350-8a3f-99ad0000969a
+ā, b̄, σ̄ = mod2_1t_sum[:, :median]
+
+# ╔═╡ 1bcc7dde-85ef-48b7-b7ff-9d9560bdc16d
 let
-	fig = Figure()
-	
-	let
-		plt = data(post1_4t_df) * visual(Lines) * mapping(:σ; color=:chain)
-		axis = (; ylabel="σ", xlabel="Iteration", title="Traces")
-  		draw!(fig[1, 1], plt; axis)
-	end
-	
-	let
-		plt = data(post1_4t_df) * mapping(:σ; color=:chain) * AlgebraOfGraphics.density()
-		axis = (; title="Density σ")
-		draw!(fig[1, 2], plt; axis)
-	end
-
-	fig
-end
-
-# ╔═╡ be8ef59e-ba27-4432-8eed-99834498c5f3
-begin
-	w = 1.0:0.01:8.0
-	l = 6.0:0.01:15.0
 	f = Figure()
-	ax = Axis(f[1, 1], title = "Time on width or width",
-		xlabel = "Width/Length", ylabel = "Time in the air")
-	lines!(w, mean(post1_4t_df.a) .+ mean(post1_4t_df.b) .* w .+ mean(post1_4t_df.c))
-	lines!(l, mean(post1_4t_df.a) .+ mean(post1_4t_df.c) .* l .+ mean(post1_4t_df.b))
-
-	current_figure()
+	ax = Axis(f[1, 1]; title = "HDI ~ income",
+		xlabel = "Average state income in 2000",
+		ylabel = "Human Development Index")
+	for i in 1:size(hdivotes, 1)
+		if length(hdivotes.abbr[i]) > 0
+			annotations!(hdivotes.abbr[i],
+				position = (hdivotes.income[i], hdivotes.hdi[i]),
+				textsize = 10)
+		end
+	end
+	ax = Axis(f[1, 2]; title = "Ranked HDI ~ ranked income",
+		xlabel = "Rank of average state income in 2000",
+		ylabel = "Rank of Human Development Index")
+	for i in 1:size(hdivotes2, 1)
+		if length(hdivotes2.abbr[i]) > 0
+			annotations!(hdivotes2.abbr[i],
+				position = (i, hdivotes2.rank_hdi[i]),
+				textsize = 10)
+		end
+	end
+	x = 0:52
+	lines!(x, ā .+ b̄ .* x; color=:red)
+	
+	f
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
-AlgebraOfGraphics = "cbdf2221-f076-402e-a563-3d30da359d67"
 DrWatson = "634d3b9d-ee7a-5ddf-bec9-22491ea816e1"
 GLM = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
 GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
@@ -132,7 +208,6 @@ RegressionAndOtherStories = "21324389-b050-441a-ba7b-9a837781bda0"
 Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
 
 [compat]
-AlgebraOfGraphics = "~0.6.6"
 DrWatson = "~2.9.1"
 GLM = "~1.7.0"
 GLMakie = "~0.5.5"
@@ -147,7 +222,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.9.0-DEV"
 manifest_format = "2.0"
-project_hash = "1ce2b28b0e00e50a0948ebc0de4526a075a91229"
+project_hash = "ae759d14bfda20c70fa3edbf749b178ab4024b17"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -1858,17 +1933,21 @@ version = "3.5.0+0"
 # ╔═╡ Cell order:
 # ╟─0391fc17-09b7-47d7-b799-6dc6de13e82b
 # ╟─eb7ea04a-da52-4e69-ac3e-87dc7f014652
-# ╠═b95f0107-fdc3-4e90-95ef-b4ccb9bbf5b7
-# ╟─4755dab0-d228-41d3-934a-56f2863a5652
+# ╟─d7543b63-52d3-449b-8ce3-d979c23f8b95
+# ╠═ed172871-fa4d-4111-ac0a-341898917948
 # ╠═5084b8f0-65ac-4704-b1fc-2a9008132bd7
-# ╠═f27de704-7bc0-4e11-ae4b-a18ee0097782
-# ╠═74882014-7ec5-42c3-ac70-fd532d269ac4
-# ╟─b1d5448e-7dc0-4d62-9f7f-cf5093fbcb71
-# ╠═a078b55c-d06a-4d1b-a9dd-b87963df3d6c
-# ╠═b1ce6698-4ea4-4826-87bb-9b162d15fb26
-# ╠═91552c30-cee6-45a3-b208-02b8e3347be5
-# ╠═8f825b88-b9ae-4cbf-b27f-946d6ef7c316
-# ╠═66c5408b-6a18-41e7-88ce-b3427a3961e1
-# ╠═be8ef59e-ba27-4432-8eed-99834498c5f3
+# ╟─4755dab0-d228-41d3-934a-56f2863a5652
+# ╠═f71640c9-3918-475e-b32b-c85424bbcf5e
+# ╠═6c2043f4-dcbd-4535-a5ae-61c109519879
+# ╠═d7b5bfec-3ca7-46fe-aed5-094ee266016b
+# ╠═2dd08df7-a6dd-4a19-a673-a98c43e4d552
+# ╠═c4d6df3e-3cc9-4588-84e6-fe7265f01027
+# ╠═696eb9b0-f239-425b-8b71-802dfd9d8a42
+# ╠═1cebb5eb-0ae1-4ee4-bf0f-7695b653f721
+# ╠═77a71063-4a56-4578-845e-b85018ebd6a1
+# ╠═43079a20-9ceb-4c6d-9848-db6e7487e6b3
+# ╠═a96a5658-33c6-4f73-8e5e-bb74b2e7fec1
+# ╠═9cf379d5-aac4-4350-8a3f-99ad0000969a
+# ╠═1bcc7dde-85ef-48b7-b7ff-9d9560bdc16d
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
