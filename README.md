@@ -13,6 +13,9 @@ This project will contain (work is in very early stages of progress!!!) a set of
 
 These notebooks are intended to be used in conjunction with above book.
 
+The notebooks will follow [this](https://avehtari.github.io/ROS-Examples/examples.html#Examples_by_chapters) sequence.
+
+
 ## Personal note
 
 This project will take quite a while to complete, I expect at least a year. But it has a special meaning to me: When I started to work on Julia interfaces for Stan's cmdstan binary in 2011, I did that to work through the ["ARM" book](http://www.stat.columbia.edu/~gelman/arm/). The ["ROS" book](https://www.cambridge.org/highereducation/books/regression-and-other-stories/DD20DD6C9057118581076E54E40C372C#overview) in a sense the successor to the ARM book.
