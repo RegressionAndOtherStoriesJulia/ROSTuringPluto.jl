@@ -12,7 +12,7 @@ begin
 	# Specific to this notebook
     using GLM
 
-	# Specific to ROSStanPluto
+	# Specific to ROSTuringPluto
 	using Optim
 	using Logging
     using Turing
@@ -22,12 +22,9 @@ begin
     using Makie
     using AlgebraOfGraphics
 
-	# Include basic packages
-	using RegressionAndOtherStories
-	import RegressionAndOtherStories: link
-	
 	# Common data files and functions
 	using RegressionAndOtherStories
+	import RegressionAndOtherStories: link
 
 	set_aog_theme!()
 	Logging.disable_logging(Logging.Warn);
@@ -109,7 +106,7 @@ let
         draw!(fig[1, 1], plt; axis)
     end
     let
-        title = "Data and linear fit"
+        title = "Data and linear fit using glm"
         cols = mapping(:growth, :vote)
         scat = visual(Scatter) + linear()
         plt = data(hibbs) * cols * scat
@@ -118,6 +115,61 @@ let
         annotations!("vote = 46.2 + 3.0 * growth"; position=(0, 41))
     end
     fig
+end
+
+# ╔═╡ 4db5bed1-6ef8-4ba0-99f2-d7b680404247
+@model function ppl7_1(growth, vote)
+    a ~ Normal(50, 20)
+    b ~ Normal(2, 10)
+    σ ~ Exponential(1)
+    μ = a .+ b .* growth
+    for i in eachindex(vote)
+        vote[i] ~ Normal(μ[i], σ)
+    end
+end
+
+# ╔═╡ d2646cf5-b102-473f-aad7-b8add3f08de7
+begin
+	m7_1t = ppl7_1(hibbs.growth, hibbs.vote)
+	chns7_1t = sample(m7_1t, NUTS(), MCMCThreads(), 1000, 4)
+	describe(chns7_1t)
+end
+
+# ╔═╡ 4a3a4dbf-78a7-4c6e-a778-b44105ee44fd
+begin
+	post7_1t = DataFrame(chns7_1t)[:, 3:5]
+	ms7_1t = model_summary(post7_1t, names(post7_1t))
+end
+
+# ╔═╡ abbec50c-966e-4b26-822e-3ef1a7922b82
+let
+	growth_range = LinRange(minimum(hibbs.growth), maximum(hibbs.growth), 200)
+	votes = median.(link(post7_1t, (r,x) -> r.a + x * r.b, growth_range))
+	
+    hibbs.label = string.(hibbs.year)
+	xlabel = "Average growth personal income [%]"
+	ylabel="Incumbent's party vote share"
+
+	fig = Figure()
+    let
+        title = "Forecasting the election from the economy"
+        plt = data(hibbs) * 
+            mapping(:label => verbatim, (:growth, :vote) => Point) *
+            visual(Annotations, textsize=15)
+        axis = (; title, xlabel, ylabel)
+        draw!(fig[1, 1], plt; axis)
+    end
+	
+	ax = Axis(fig[1, 2]; title="Regression line based on 4000 posterior samples", 
+		subtitle = "(grey lines based on first 200 draws of :a and :b)",
+		xlabel, ylabel)
+	for i in 1:200
+		lines!(growth_range, post7_1t.a[i] .+ post7_1t.b[i] .* growth_range, color = :lightgrey)
+	end
+	scatter!(hibbs.growth, hibbs.vote)
+	lines!(growth_range, votes, color = :red)
+    annotations!("vote = 46.2 + 3.0 * growth"; position=(2, 41))
+	fig
 end
 
 # ╔═╡ fa2fe95b-fe29-40c8-8dfc-27a35e720f3d
@@ -265,7 +317,7 @@ let
 		yminorgridvisible = true, yminorticks = IntervalsBetween(8))
 
 		xlims!(ax, [0, 8])
-		hist!(i == 1 ? pks.delay : nopks.delay)
+		hist!(i == 1 ? pks.delay : nopks.delay; bins=20)
 	end
 	f
 end
@@ -445,7 +497,7 @@ end
     a ~ Normal(10, 5)
 	b_exp ~ Normal(5, 5)
     σ ~ Exponential(1)
-    μ = a .+ b_exp .* exp.(x)
+    μ = a .+ b_exp .* exp.(-x)
     for i in eachindex(x)
         y[i] ~ Normal(μ[i], σ)
     end
@@ -453,43 +505,58 @@ end
 
 # ╔═╡ 6906be3f-51ed-4471-b843-7c7487c851c4
 begin
-	Random.seed!(1533)
-	n1 = 30
-	x1 = rand(Uniform(1, 5), n1)
-	y1 = [rand(Normal(5 + 30exp(-x1[i]), 2), 1)[1] for i in 1:n1]
+	#Random.seed!(1533)
+	n1 = 50
+	x1 = LinRange(1, 6, 50)
+	y1 = [rand(Normal(5 + 30exp(-x1[i]), 2), 1)[1] for i in 1:length(x1)]
 end;
 
-# ╔═╡ a587d71c-6c6b-4298-8e16-0ac9a25041dc
+# ╔═╡ 5729c4b4-ecd9-433d-9587-59343a68d363
 begin
 	m1_3at = ppl1_3a(x1, y1)
 	chns1_3at = sample(m1_3at, NUTS(), MCMCThreads(), 1000, 4)
-	post1_3at = DataFrame(chns1_3at[[:a, :b, :σ]])
-	plot_chains(post1_3at, [:a, :b, :σ])
+	describe(chns1_3at)
 end
 
-# ╔═╡ 0a4bc48c-be88-4305-8688-4504c4f8bab6
+# ╔═╡ c8664dce-ff44-45f2-b901-d76d25224906
+begin
+	post1_3at = DataFrame(chns1_3at[[:a, :b, :σ]])
+	ms1_3at = model_summary(post1_3at, [:a, :b, :σ])
+end
+
+# ╔═╡ f325bc79-705d-452e-b9cc-61e9efc4e0b5
+plot_chains(post1_3at, [:a, :b, :σ])
+
+# ╔═╡ a90bd507-ab18-42eb-acea-80c96bfd02c2
+trankplot(post1_3at, "a")
+
+# ╔═╡ 6fc35d45-9c07-45be-9627-21ca06d880e6
 begin
 	m1_3bt = ppl1_3b(x1, y1)
 	chns1_3bt = sample(m1_3bt, NUTS(), MCMCThreads(), 1000, 4)
-	post1_3bt = DataFrame(chns1_3bt[[:a, :b_exp, :σ]])
-	plot_chains(post1_3bt, [:a, :b_exp, :σ])
+	describe(chns1_3bt)
 end
 
-# ╔═╡ dea5ae47-f8af-4b0d-ad9e-a479efd2e5a3
-ms1_3at = model_summary(post1_3at, [:a, :b, :σ])
+# ╔═╡ 5fa245ee-9d8e-40fd-b2e6-1334f02980ec
+begin
+	post1_3bt = DataFrame(chns1_3bt[[:a, :b_exp, :σ]])
+	ms1_3bt = model_summary(post1_3bt, [:a, :b_exp, :σ])
+end
 
-# ╔═╡ 24828730-3cdf-4f93-97d8-0fa431dc0572
-ms1_3bt = model_summary(post1_3bt, [:a, :b_exp, :σ])
+# ╔═╡ c44c2799-91ca-4a55-b83d-260f1536c4e0
+plot_chains(post1_3bt, [:a, :b_exp, :σ])
+
+# ╔═╡ 2d9d8ca8-1823-48ff-b21a-9e2d60145776
+trankplot(post1_3bt, "b_exp")
 
 # ╔═╡ 8adff5cd-937c-4ebc-94eb-955f75e93097
-â₁, b̂, σ̂₁ = ms1_3at[:, :median];
+â₁, b̂, σ̂₁ = ms1_3at[:, :median]
 
 # ╔═╡ 571df463-1f3c-43d0-8c9e-e9b927694979
-â₂, b̂ₑₓₚ, σ̂₂ = ms1_3bt[:, :median];
+â₂, b̂ₑₓₚ, σ̂₂ = ms1_3bt[:, :median]
 
-# ╔═╡ e17c5d8a-da92-4db6-a3d9-63265b2526d9
+# ╔═╡ 739b4c23-52db-49ff-9e4c-49188bba8e61
 let
-	x1 = range(1.0, 5.9, length=n1)
 	f = Figure()
 	ax = Axis(f[1, 1], title = "Linear regression",
 		xlabel = "Treatments", ylabel = "Outcomes")
@@ -502,6 +569,7 @@ let
 	lines!(x1, â₂ .+ b̂ₑₓₚ .* exp.(-x1))
 	f
 end
+
 
 # ╔═╡ bbdb71e9-01f8-4925-8707-b13df2917706
 â₂
@@ -549,8 +617,14 @@ end
 # ╔═╡ 08d695b3-8f77-4079-9106-3d38d9762cc3
 md" ### 1.5 Classical and Bayesian inference."
 
+# ╔═╡ d8226c30-ffd8-4183-8bb8-d16d45e03bf7
+md" ###### No code."
+
 # ╔═╡ 74b247dc-c058-433b-9881-e1b85dacae84
 md" ### 1.6 Computing least-squares and Bayesian regression."
+
+# ╔═╡ 5c48b16d-3d20-4c9d-836b-0a727d642cb7
+md" ###### No code."
 
 # ╔═╡ effd481c-a47f-404a-a42f-207528b9b41b
 md" ### 1.8 Exercises."
@@ -586,37 +660,33 @@ md" ##### Simulate 40 helicopters."
     end
 end
 
-# ╔═╡ 4bfd6fe4-51cd-473a-967f-889f44e29cf8
+# ╔═╡ c1b865b4-02f6-4fe5-980d-14c57f680459
 begin
 	m1_4t = ppl1_4(helis.width_cm, helis.length_cm, helis.time_sec)
 	chns1_4t = sample(m1_4t, NUTS(), MCMCThreads(), 1000, 4)
-	post1_4t = DataFrame(chns1_4t[[:a, :b, :c, :σ]])
-	plot_chains(post1_4t, [:a, :b, :c])
+	describe(chns1_4t)
 end
 
-# ╔═╡ b85fd691-be86-4b82-ac26-7de4ca6021e5
+# ╔═╡ 5acb5d8a-880d-4721-813d-d0517cb09f2d
+begin
+	post1_4t = DataFrame(chns1_4t[[:a, :b, :c, :σ]])
 	ms1_4t = model_summary(post1_4t, [:a, :b, :c, :σ])
+end
 
-# ╔═╡ d16f2383-5863-4035-b818-ecdafee85fb7
+# ╔═╡ 48195273-05ff-4454-93f0-00df2332f7e8
+ms1_4t[:b, :median]
+
+# ╔═╡ b87a84a5-4513-4f7d-b809-25ccb772fc5d
 plot_chains(post1_4t, [:a, :b, :c])
 
-# ╔═╡ e1b0e312-de63-4c8d-bc3c-d6d507921d51
-let
-	w = 1.0:0.01:8.0
-	l = 6.0:0.01:15.0
-	f = Figure()
-	ax = Axis(f[1, 1], title = "Time on width or width",
-		xlabel = "Width/Length", ylabel = "Time in the air")
-	lines!(w, mean(post1_4t.a) .+ mean(post1_4t.b) .* w .+ mean(post1_4t.c))
-	lines!(l, mean(post1_4t.a) .+ mean(post1_4t.c) .* l .+ mean(post1_4t.b))
-
-	current_figure()
-end
+# ╔═╡ d16f2383-5863-4035-b818-ecdafee85fb7
+trankplot(post1_4t, "b")
 
 # ╔═╡ 790839f9-0b49-4da2-8dc1-00bab883e3af
 let
 	w_range = LinRange(1.0, 8.0, 100)
 	w_times = mean.(link(post1_4t, (r, w) -> r.a + r.c + r.b * w, w_range))
+	
 	l_range = LinRange(6.0, 15.0, 100)
 	l_times = mean.(link(post1_4t, (r, l) -> r.a + r.b + r.c * l, l_range))
 	
@@ -636,7 +706,7 @@ end
 md"
 !!! note
 
-Note that the `link` function is defined in both RegeressionAndOtherStories (ROS) and Turing. In this case I added the `import` statement at the top of this notebook but I could also have qualified the call to ling ( `ROS.link` )."
+Note that the `link` function is defined in both RegeressionAndOtherStories (ROS) and Turing. In this case I added the `import` statement at the top of this notebook but I could also have qualified the call to link ( `ROS.link` )."
 
 # ╔═╡ b518fea5-298c-46f0-a749-4238ba2af17f
 lnk1_4t = link(post1_4t, (r, l) -> r.a + r.b + r.c * l, [5, 10,12])
@@ -648,7 +718,7 @@ median.(lnk1_4t)
 mad.(lnk1_4t)
 
 # ╔═╡ b413c2d6-dc44-4437-8123-ee7793863387
-mean.(link(post1_4t, (r, l) -> r.a + r.b + r.c * l, [5, 10,12]))
+mean.(lnk1_4t)
 
 # ╔═╡ Cell order:
 # ╟─eb7ea04a-da52-4e69-ac3e-87dc7f014652
@@ -668,6 +738,10 @@ mean.(link(post1_4t, (r, l) -> r.a + r.b + r.c * l, [5, 10,12]))
 # ╠═f48df50b-5450-4998-8dab-014c8b9d42a2
 # ╠═be41c745-c87d-4f3a-ab4e-a8ae3b9ae091
 # ╠═06ab4f30-68cc-4e35-9fa2-b8f8f25d3776
+# ╠═4db5bed1-6ef8-4ba0-99f2-d7b680404247
+# ╠═d2646cf5-b102-473f-aad7-b8add3f08de7
+# ╠═4a3a4dbf-78a7-4c6e-a778-b44105ee44fd
+# ╠═abbec50c-966e-4b26-822e-3ef1a7922b82
 # ╟─fa2fe95b-fe29-40c8-8dfc-27a35e720f3d
 # ╟─accfc0d8-968a-4b6c-bc1b-9da1aebe6cde
 # ╠═305f0fb9-5e3a-45fd-8f57-edfdf65fb0e8
@@ -721,13 +795,17 @@ mean.(link(post1_4t, (r, l) -> r.a + r.b + r.c * l, [5, 10,12]))
 # ╠═0eeb634d-a05f-46b4-baa0-613ed841aeaa
 # ╠═2b781e56-7e97-491f-912d-0d7d50b5ab08
 # ╠═6906be3f-51ed-4471-b843-7c7487c851c4
-# ╠═a587d71c-6c6b-4298-8e16-0ac9a25041dc
-# ╠═0a4bc48c-be88-4305-8688-4504c4f8bab6
-# ╠═dea5ae47-f8af-4b0d-ad9e-a479efd2e5a3
-# ╠═24828730-3cdf-4f93-97d8-0fa431dc0572
+# ╠═5729c4b4-ecd9-433d-9587-59343a68d363
+# ╠═c8664dce-ff44-45f2-b901-d76d25224906
+# ╠═f325bc79-705d-452e-b9cc-61e9efc4e0b5
+# ╠═a90bd507-ab18-42eb-acea-80c96bfd02c2
+# ╠═6fc35d45-9c07-45be-9627-21ca06d880e6
+# ╠═5fa245ee-9d8e-40fd-b2e6-1334f02980ec
+# ╠═c44c2799-91ca-4a55-b83d-260f1536c4e0
+# ╠═2d9d8ca8-1823-48ff-b21a-9e2d60145776
 # ╠═8adff5cd-937c-4ebc-94eb-955f75e93097
 # ╠═571df463-1f3c-43d0-8c9e-e9b927694979
-# ╠═e17c5d8a-da92-4db6-a3d9-63265b2526d9
+# ╠═739b4c23-52db-49ff-9e4c-49188bba8e61
 # ╠═bbdb71e9-01f8-4925-8707-b13df2917706
 # ╠═6117eb00-9b5a-4a1e-bb5a-cf572ece8ee0
 # ╠═0dfa1d16-25de-4eee-8595-1bc1425492ab
@@ -736,7 +814,9 @@ mean.(link(post1_4t, (r, l) -> r.a + r.b + r.c * l, [5, 10,12]))
 # ╠═8a39f298-9ca3-4f59-964e-68a4de98128b
 # ╠═5e646a78-0ef7-4c8f-a316-b7c606e5e133
 # ╟─08d695b3-8f77-4079-9106-3d38d9762cc3
+# ╟─d8226c30-ffd8-4183-8bb8-d16d45e03bf7
 # ╟─74b247dc-c058-433b-9881-e1b85dacae84
+# ╟─5c48b16d-3d20-4c9d-836b-0a727d642cb7
 # ╟─effd481c-a47f-404a-a42f-207528b9b41b
 # ╟─08710628-ff52-4a95-a4f5-5dfce2fda165
 # ╠═b2045d0f-afc1-4046-90c5-55f39cf11c84
@@ -744,10 +824,11 @@ mean.(link(post1_4t, (r, l) -> r.a + r.b + r.c * l, [5, 10,12]))
 # ╠═f7444121-7211-4999-ac6b-3a3c8738a4e3
 # ╟─f43b4ef0-9e1a-4b80-8a83-b8b3ff497a16
 # ╠═b609b38b-4e71-482e-b12f-666c906fba38
-# ╠═4bfd6fe4-51cd-473a-967f-889f44e29cf8
-# ╠═b85fd691-be86-4b82-ac26-7de4ca6021e5
+# ╠═c1b865b4-02f6-4fe5-980d-14c57f680459
+# ╠═5acb5d8a-880d-4721-813d-d0517cb09f2d
+# ╠═48195273-05ff-4454-93f0-00df2332f7e8
+# ╠═b87a84a5-4513-4f7d-b809-25ccb772fc5d
 # ╠═d16f2383-5863-4035-b818-ecdafee85fb7
-# ╠═e1b0e312-de63-4c8d-bc3c-d6d507921d51
 # ╠═790839f9-0b49-4da2-8dc1-00bab883e3af
 # ╟─44f06f91-a6b2-4c84-8be1-a86bc2040ba3
 # ╠═b518fea5-298c-46f0-a749-4238ba2af17f

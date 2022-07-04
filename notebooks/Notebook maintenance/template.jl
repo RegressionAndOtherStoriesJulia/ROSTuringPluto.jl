@@ -22,7 +22,7 @@ begin
 	# Specific to this notebook
     using GLM
 
-	# Specific to ROPTuringluto
+	# Specific to ROSTuringPluto
 	using Optim
 	using Logging
     using Turing
@@ -32,17 +32,14 @@ begin
     using Makie
     using AlgebraOfGraphics
 
-	# Include basic packages
-	using RegressionAndOtherStories
-	import RegressionAndOtherStories: link
-	
 	# Common data files and functions
 	using RegressionAndOtherStories
+	import RegressionAndOtherStories: link
 
 	set_aog_theme!()
 	Logging.disable_logging(Logging.Warn)
 end;
 
-md"### 6.1 "
+md"### X.1 ..."
 
 hdi = CSV.read(ros_datadir("HDI", "hdi.csv"), DataFrame)

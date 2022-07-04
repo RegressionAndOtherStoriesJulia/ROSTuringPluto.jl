@@ -262,11 +262,32 @@ md" ### 2.3 All graphs are comparisons."
 # ╔═╡ 3a5363ed-e6c9-4c85-9c6e-8f74e99be6be
 health = CSV.read(ros_datadir("HealthExpenditure", "healthdata.csv"), DataFrame; missingstring="NA", pool=false)
 
-# ╔═╡ e0b04e8a-5d51-4331-8483-4c4f038aa5e7
-exp = lm(@formula(lifespan ~ spending), health)
+# ╔═╡ 561661dd-732d-4f7e-acf5-1c8d563cb51a
+@model function ppl2_3(x, y)
+    a ~ Normal(0, 50)
+    b ~ Normal(0, 50)
+    σ ~ Exponential(1)
+    μ = a .+ b .* x
+    for i in eachindex(y)
+        y[i] ~ Normal(μ[i], σ)
+    end
+end
 
-# ╔═╡ 391822fa-dc53-4f02-b7de-fcf627c6fd8a
-â, b̂ = coef(exp)
+# ╔═╡ 85f51724-2b0b-42b5-80b0-3a9cc2060c4b
+begin
+	m2_3t = ppl2_3(health.spending, health.lifespan)
+	chns2_3t = sample(m2_3t, NUTS(), MCMCThreads(), 1000, 4)
+	describe(chns2_3t)
+end
+
+# ╔═╡ 07e30525-e421-4905-9ed6-0f0b06c5e2c1
+begin
+	post2_3t = DataFrame(chns2_3t)[:, 3:5]
+	ms2_3t = model_summary(post2_3t, [:a, :b, :σ])
+end
+
+# ╔═╡ a753917e-e88b-49c7-b65e-865f7109eae5
+â, b̂, σ̂ = ms2_3t[:, :median]
 
 # ╔═╡ 4dc4adec-a059-4332-81fd-e77a675eb40b
 let
@@ -395,22 +416,22 @@ end
 md" ### 2.4 Data and adjustment."
 
 # ╔═╡ fb925b13-efa2-4d77-8e75-e00cfd294902
-md" #### Not yet done."
+md" #### Not yet done. A good exercise ...?"
 
 # ╔═╡ 4e009883-b9ca-4001-a8c2-748b096bc0b1
-age = CSV.read(joinpath(expanduser("~"), ".julia", "dev", "RegressionAndOtherStories", "data", "AgePeriodCohort", "US-EST00INT-ALLDATA.csv"), DataFrame)
+age = CSV.read(ros_datadir("AgePeriodCohort", "US-EST00INT-ALLDATA.csv"), DataFrame)
 
 # ╔═╡ 62b481f7-b52d-4bd5-be07-f2aaea9ab985
 names(age)
 
 # ╔═╡ d6cda2f8-af2e-4079-8534-4c7ad13da79b
-white_nonhisp = CSV.read(joinpath(expanduser("~"), ".julia", "dev", "RegressionAndOtherStories", "data", "AgePeriodCohort", "white_nonhisp_death_rates.txt"), DataFrame; delim="\t")
+white_nonhisp = CSV.read(ros_datadir("AgePeriodCohort", "white_nonhisp_death_rates.txt"), DataFrame; delim="\t")
+
+# ╔═╡ 856b8105-68d3-4b8a-bf28-d164b94b0946
+white_hisp = CSV.read(ros_datadir("AgePeriodCohort", "white_nonhisp_death_rates_by_sex.txt"), DataFrame; delim="\t")
 
 # ╔═╡ 6ccd2583-5983-4586-b653-2f5bbe09f77d
 white_nonhisp_by_sex = CSV.read(joinpath(expanduser("~"), ".julia", "dev", "RegressionAndOtherStories", "data", "AgePeriodCohort", "white_nonhisp_death_rates_by_sex.txt"), DataFrame; delim="\t")
-
-# ╔═╡ 856b8105-68d3-4b8a-bf28-d164b94b0946
-white_hisp = CSV.read(joinpath(expanduser("~"), ".julia", "dev", "RegressionAndOtherStories", "data", "AgePeriodCohort", "white_nonhisp_death_rates_by_sex.txt"), DataFrame; delim="\t")
 
 # ╔═╡ Cell order:
 # ╟─eb7ea04a-da52-4e69-ac3e-87dc7f014652
@@ -439,8 +460,10 @@ white_hisp = CSV.read(joinpath(expanduser("~"), ".julia", "dev", "RegressionAndO
 # ╠═f19cabdb-3af5-4ab7-981e-601c15e9829b
 # ╟─20b7fa5b-0272-443f-afee-e945584d8bfc
 # ╠═3a5363ed-e6c9-4c85-9c6e-8f74e99be6be
-# ╠═e0b04e8a-5d51-4331-8483-4c4f038aa5e7
-# ╠═391822fa-dc53-4f02-b7de-fcf627c6fd8a
+# ╠═561661dd-732d-4f7e-acf5-1c8d563cb51a
+# ╠═85f51724-2b0b-42b5-80b0-3a9cc2060c4b
+# ╠═07e30525-e421-4905-9ed6-0f0b06c5e2c1
+# ╠═a753917e-e88b-49c7-b65e-865f7109eae5
 # ╠═4dc4adec-a059-4332-81fd-e77a675eb40b
 # ╟─caf0483a-eab8-419a-b04a-57fce2c261a8
 # ╠═149ad128-8194-48ac-90ce-b7d09f2c1272
