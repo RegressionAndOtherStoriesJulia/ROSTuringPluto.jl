@@ -1,0 +1,48 @@
+md"#### See chapter 6 in Regression and Other Stories."
+
+
+md" ##### Widen the notebook."
+
+html"""
+<style>
+	main {
+		margin: 0 auto;
+		max-width: 2000px;
+    	padding-left: max(160px, 10%);
+    	padding-right: max(160px, 10%);
+	}
+</style>
+"""
+
+using Pkg, DrWatson
+
+md"##### A typical set of Julia packages to include in notebooks."
+
+begin
+	# Specific to this notebook
+    using GLM
+
+	# Specific to ROPTuringluto
+	using Optim
+	using Logging
+    using Turing
+	
+	# Graphics related
+    using GLMakie
+    using Makie
+    using AlgebraOfGraphics
+
+	# Include basic packages
+	using RegressionAndOtherStories
+	import RegressionAndOtherStories: link
+	
+	# Common data files and functions
+	using RegressionAndOtherStories
+
+	set_aog_theme!()
+	Logging.disable_logging(Logging.Warn)
+end;
+
+md"### 6.1 "
+
+hdi = CSV.read(ros_datadir("HDI", "hdi.csv"), DataFrame)

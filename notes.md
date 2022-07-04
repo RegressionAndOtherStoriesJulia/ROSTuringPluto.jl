@@ -8,12 +8,21 @@
 ### Cloning the repository
 
 ```
-# Cd to where you would like to clone to
+# Cd to where you would like to clone to, e.g. `~/.julia/dev`.
 $ git clone https://github.com/StanJulia/ROSTuringPluto.jl ROSTuringPluto
-$ cd ROSTuringPluto
+$ cd ROSTuringPluto/notebooks
 $ julia
 ```
-and in the Julia REPL:
+
+To use in Pluto:
+```
+julia> using Pluto
+julia> Pluto.run()
+```
+
+Navigate in browser page opened by Pluto to a notebook file.
+
+To use in the Julia REPL:
 
 ```
 julia> ]                               # Actvate Pkg mode
