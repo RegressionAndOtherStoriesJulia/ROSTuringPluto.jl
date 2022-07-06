@@ -22,12 +22,9 @@ begin
     using Makie
     using AlgebraOfGraphics
 
-	# Include basic packages
-	using RegressionAndOtherStories
-	import RegressionAndOtherStories: link
-	
 	# Common data files and functions
 	using RegressionAndOtherStories
+	import RegressionAndOtherStories: link
 
 	set_aog_theme!()
 	Logging.disable_logging(Logging.Warn)
@@ -211,6 +208,9 @@ begin
 	f
 end
 
+# ╔═╡ a8d0258a-0b17-45c9-985a-420f0bec67e3
+err_lims
+
 # ╔═╡ 769e98f4-f771-4084-9805-c93eaf95f934
 md" ### 4.3 Bias and unmodeled uncertaincy."
 
@@ -248,6 +248,7 @@ md" ### 4.7 Moving beyond hypothesis testing."
 # ╠═3d2b0416-8510-463d-9ed0-a598085d9918
 # ╠═4be6f3e8-1391-4f3a-9b13-0f8537b92a34
 # ╠═886c48b5-c6ee-4a2e-b156-ba33217cc39d
+# ╠═a8d0258a-0b17-45c9-985a-420f0bec67e3
 # ╟─769e98f4-f771-4084-9805-c93eaf95f934
 # ╟─b810964a-deb9-41fd-963e-7e6b21005417
 # ╟─a6d4b0bd-acf2-45af-90c9-36c330439179

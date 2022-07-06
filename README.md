@@ -9,12 +9,11 @@
 
 ## Purpose
 
-This project will contain (work is in very early stages of progress!!!) a set of Pluto notebooks that contain Julia versions of the examples in the R project `ROS-Examples` based on the book ["Regression and Other Stories" by A Gelman, J Hill and A Vehtari](https://www.cambridge.org/highereducation/books/regression-and-other-stories/DD20DD6C9057118581076E54E40C372C#overview).
+This project will contain (work is in early stages of progress!) a set of Pluto notebooks that contain Julia versions of the examples in the R project `ROS-Examples` based on the book ["Regression and Other Stories" by A Gelman, J Hill and A Vehtari](https://www.cambridge.org/highereducation/books/regression-and-other-stories/DD20DD6C9057118581076E54E40C372C#overview).
 
 These notebooks are intended to be used in conjunction with above book.
 
-The notebooks will follow [this](https://avehtari.github.io/ROS-Examples/examples.html#Examples_by_chapters) sequence.
-
+Each notebook contains a chapter.
 
 ## Personal note
 
@@ -23,7 +22,7 @@ This project will take quite a while to complete, I expect at least a year. But 
 ## Prerequisites
 
 1. A functioning [Julia](https://julialang.org/downloads/).
-2. A Julia base environment containing `Pkg`, `Pluto` and `PlutoUI`.
+2. A minimal Julia base environment containing `Pkg` and `Pluto`.
 
 ## Setup the Pluto based ROSTuringPluto notebooks
 
@@ -48,4 +47,4 @@ A Pluto page should open in a browser. See [this page](https://www.juliafordatas
 
 ## Usage
 
-Select a notebook in the `open a file` entry box, e.g. type `./` and select a chapter of the book. Type a '/' after selecting the chapter to see the next level (the actual notebooks in that chapter). Select a notebook and press `open`.
+Select a notebook in the `open a file` entry box, e.g. type `./` and select `chapters` Select a chapter notebook and press `open`.

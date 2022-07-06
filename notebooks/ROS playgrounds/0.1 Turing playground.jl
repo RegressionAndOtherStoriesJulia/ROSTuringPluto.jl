@@ -22,15 +22,12 @@ begin
     using Makie
     using AlgebraOfGraphics
 
-	# Include basic packages
-	using RegressionAndOtherStories
-	import RegressionAndOtherStories: link
-	
 	# Common data files and functions
 	using RegressionAndOtherStories
+	import RegressionAndOtherStories: link
 
 	set_aog_theme!()
-	Logging.disable_logging(Logging.Warn)
+	#Logging.disable_logging(Logging.Warn)
 end;
 
 # ╔═╡ 1f693212-3ac6-4ddf-a524-b571ab062a9e
@@ -157,6 +154,12 @@ begin
 	describe(chns1_1t)
 end
 
+# ╔═╡ 13e24eac-d6b1-490d-840c-eec58ed08503
+md"
+!!! note
+
+Mostly I disable logging early on in notebooks using Turing. But it is also possible to do this `by cell`. Click on the little circle with 3 dots at the top of the selected cell and select `Hide logs`."
+
 # ╔═╡ ff355e32-acfd-44bc-ba5c-85d925c98aff
 begin
 	post1_1t = DataFrame(chns1_1t)[:, [:a, :b, :σ]]
@@ -265,22 +268,136 @@ end
 describe(pred_chns1_1t)
 
 # ╔═╡ 7195be8a-69dc-4efe-8737-30d2c52c5f2e
-let
+begin
 	pred1_1t = DataFrame(pred_chns1_1t)[:, 3:end]
 	ms1_1t = model_summary(pred1_1t, names(pred1_1t))
+end
+
+# ╔═╡ dab4aa24-1240-4799-a6e1-7474c6a8d2bc
+pred1_1t
+
+# ╔═╡ 364e4670-25fb-4dd2-97fe-40746ecd0029
+let
+	x = -1:0.1:6
+	preds = mean(post1_1t.a) .+ mean(post1_1t.b) .* x
+	f = Figure()
+	ax = Axis(f[1, 1], title = "Regression line (green) and MAP based regression line (blue).",
+		xlabel = "Growth", ylabel = "Vote")
+	
+	lines!(f[1, 1], x, â .+ b̂ .* x, color=:darkblue)
+	lines!(x, preds, color=:darkgreen, label="Regression line")
+	scatter!(hibbs.growth, hibbs.vote, color=:darkred, leg=false)
+	scatter!(x_test, reshape(mean(Matrix(pred1_1t); dims=1), ncol(pred1_1t)), markersize=20)
+	current_figure()
+end
+
+# ╔═╡ 4faa2a07-292a-498e-a2d7-74848e9826de
+function nested_column_to_matrix(df::DataFrame, var::Union{Symbol, String})
+	m = zeros(nrow(df), length(df[1, var]))
+	i = 1
+    for r in eachrow(df[:, var])
+		for j in 1:length(r[1])
+			m[i, j] = r[1][j]
+		end
+		i += 1
+    end
+	m
+ end
+
+# ╔═╡ 5ba9b7d1-7926-435e-95e7-beefbd440c35
+function errorbars_mean(df, p = [0.055, 0.945])
+	se_df = DataFrame()
+	i = 1
+	for col in eachcol(df)
+		n = length(col)
+		est = mean(col)
+		se = std(col)/sqrt(n)
+		int = [abs.(quantile.(TDist(n-1), p) * se)]
+		append!(se_df, DataFrame(parameters = names(df)[i], estimate = est, se = se, p = [p], q = int))
+		i += 1
+	end
+	se_df
+end
+
+# ╔═╡ 7cb60d65-0dc1-432f-b023-1ce592a5a174
+errorbars_mean(pred1_1t)
+
+# ╔═╡ f978a052-90e1-4166-aea4-8f23ccb681d3
+function errorbars_draws(df, p = [0.25, 0.75])
+	q_df = DataFrame()
+	i = 1
+	for col in eachcol(df)
+    	m = median(col)
+		s = mad(col)
+    	int = [abs.(quantile(col, p) .- m)]
+		append!(q_df, DataFrame(parameters = names(df)[i], median = m, mad_sd = s, p = [p], q = int))
+		i += 1
+	end
+	q_df
+end
+
+
+# ╔═╡ 45fb3b70-7e67-42fb-aa67-067e06ab68aa
+errorbars_draws(pred1_1t, [0.055, 0.945])
+
+# ╔═╡ 4d1ecd0a-337d-4507-8e38-8195f80d6d99
+let
+	x = -1:0.1:6
+	preds = mean(post1_1t.a) .+ mean(post1_1t.b) .* x
+	pred_values = reshape(mean(Matrix(pred1_1t); dims=1), ncol(pred1_1t))
+
+	f = Figure()
+	ax = Axis(f[1, 1], title = "Regression line (green).",
+		xlabel = "Growth", ylabel = "Vote")
+	
+	lines!(x, preds, color=:darkgreen, label="Regression line")
+	scatter!(hibbs.growth, hibbs.vote, color=:darkred, leg=false)
+
+	# 50% interval predictions
+	error_bars = nested_column_to_matrix(errorbars_draws(pred1_1t, [0.25, 0.75]), :q)
+	errorbars!(x_test, pred_values, error_bars[:, 1], error_bars[:, 2], whiskerwidth = 6, color=:grey)
+
+	# 89% s.e. of the mean
+	error_bars = nested_column_to_matrix(errorbars_mean(pred1_1t, [0.055, 0.945]), :q)
+	errorbars!(x_test, pred_values, error_bars[:, 1], error_bars[:, 2], whiskerwidth = 6, color=:black)
+	current_figure()
+end
+
+# ╔═╡ 10eb547d-f763-4dfd-8e90-aec59b398823
+md" ###### A quick look at broadcasting and vectorization. See also [more dots](https://julialang.org/blog/2017/01/moredots/) "
+
+# ╔═╡ f42f37ec-ba00-4053-827e-7a96eb4cc4a4
+f(x) = 3x^2 + 5x + 2
+
+# ╔═╡ cb3f7b9d-4438-42a6-b62c-f6ebdf86c134
+function nobcst(f, x)
+	f.(2 .* x.^2 .+ 6 .* x.^3 .- sqrt.(x))
+end
+
+# ╔═╡ 7f96fd3e-e37b-4bd9-9d8f-40a8e816580a
+function bcst(f, x)
+	@. f(2 * x^2 + 6 * x^3 - sqrt(x))
+end
+
+# ╔═╡ 98d9d553-8575-4a92-96b6-4e4ecbc99ab4
+let
+	n = 10^6
+	x = LinRange(0, 2, n)
+	@time nobcst(f, x)
+end
+
+# ╔═╡ daeae938-a081-4e36-ade7-1e610ac94217
+let
+	n = 10^6
+	x = LinRange(0, 2, n)
+	@time bcst(f, x)
 end
 
 # ╔═╡ 7479e897-1eb3-4251-9d3e-f97e7cf771fd
 md"#### Compute median and mad."
 
-# ╔═╡ d17758d0-fa7c-4f9c-82b7-bbb640e8a4bf
-names(post1_1t)
-
-# ╔═╡ f84dfdb9-dea4-448e-9ced-d3df01da9772
-ms1_1t = model_summary(post1_1t, [:a, :b, :σ])
-
 # ╔═╡ 130040e5-620f-464b-a8b9-ced5fa6caa6f
-ms1_1t[:b, :mad_sd]
+ms1_1t["vote[2]", "mad_sd"]
 
 # ╔═╡ 97df9584-1e89-43e4-9b14-db4eb3fd3c1b
 md" ##### Alternative computation of mad()."
@@ -355,6 +472,7 @@ Click little down arrow to the right to remove live docs again.
 # ╠═d5d66e16-487e-4214-b702-728dc3db32cc
 # ╟─b14217e8-1f70-44cc-8d3c-528ab55e27ef
 # ╠═b3adef33-c111-4d20-b277-a5346eae9f23
+# ╟─13e24eac-d6b1-490d-840c-eec58ed08503
 # ╠═ff355e32-acfd-44bc-ba5c-85d925c98aff
 # ╠═f52534b9-80e8-4d55-a826-8deccd1c0ee6
 # ╠═26d0ea8c-c405-4013-9159-d84690a85080
@@ -370,9 +488,21 @@ Click little down arrow to the right to remove live docs again.
 # ╠═c639817a-ac0c-4238-b088-6dde80cf8b80
 # ╠═00781862-dc39-4623-84c9-ce214632ae08
 # ╠═7195be8a-69dc-4efe-8737-30d2c52c5f2e
+# ╠═dab4aa24-1240-4799-a6e1-7474c6a8d2bc
+# ╠═364e4670-25fb-4dd2-97fe-40746ecd0029
+# ╠═4faa2a07-292a-498e-a2d7-74848e9826de
+# ╠═5ba9b7d1-7926-435e-95e7-beefbd440c35
+# ╠═7cb60d65-0dc1-432f-b023-1ce592a5a174
+# ╠═f978a052-90e1-4166-aea4-8f23ccb681d3
+# ╠═45fb3b70-7e67-42fb-aa67-067e06ab68aa
+# ╠═4d1ecd0a-337d-4507-8e38-8195f80d6d99
+# ╟─10eb547d-f763-4dfd-8e90-aec59b398823
+# ╠═f42f37ec-ba00-4053-827e-7a96eb4cc4a4
+# ╠═cb3f7b9d-4438-42a6-b62c-f6ebdf86c134
+# ╠═7f96fd3e-e37b-4bd9-9d8f-40a8e816580a
+# ╠═98d9d553-8575-4a92-96b6-4e4ecbc99ab4
+# ╠═daeae938-a081-4e36-ade7-1e610ac94217
 # ╟─7479e897-1eb3-4251-9d3e-f97e7cf771fd
-# ╠═d17758d0-fa7c-4f9c-82b7-bbb640e8a4bf
-# ╠═f84dfdb9-dea4-448e-9ced-d3df01da9772
 # ╠═130040e5-620f-464b-a8b9-ced5fa6caa6f
 # ╟─97df9584-1e89-43e4-9b14-db4eb3fd3c1b
 # ╠═8fe0efd4-1890-4912-baed-231010ee8744
