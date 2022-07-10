@@ -178,10 +178,10 @@ uuid = "8be319e6-bccf-4806-a6f7-6fae938471bc"
 version = "0.4.10"
 
 [[deps.ChainRules]]
-deps = ["ChainRulesCore", "Compat", "IrrationalConstants", "LinearAlgebra", "Random", "RealDot", "SparseArrays", "Statistics"]
-git-tree-sha1 = "b06ed86d99c982cbe9047a45a93ac62d9605a361"
+deps = ["ChainRulesCore", "Compat", "Distributed", "IrrationalConstants", "LinearAlgebra", "Random", "RealDot", "SparseArrays", "Statistics"]
+git-tree-sha1 = "cc81c5c6bab557f89e4b5951b252d7ab863639a4"
 uuid = "082447d4-558c-5d27-93f4-14fc19e9eca2"
-version = "1.36.2"
+version = "1.37.0"
 
 [[deps.ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra", "SparseArrays"]
@@ -624,9 +624,9 @@ version = "1.7.1"
 
 [[deps.GridLayoutBase]]
 deps = ["GeometryBasics", "InteractiveUtils", "Observables"]
-git-tree-sha1 = "d62c4b3e4bf5b68c679c8552e987ec3e72b00280"
+git-tree-sha1 = "9d9c9b62f0f63242b8f5a9c33bbcda5f3ac5c551"
 uuid = "3955a311-db13-416c-9275-1d80ed98e5e9"
-version = "0.7.8"
+version = "0.7.10"
 
 [[deps.Grisu]]
 git-tree-sha1 = "53bb909d1151e57e2484c3d1b53e19552b887fb2"
@@ -685,9 +685,9 @@ version = "0.3.1"
 
 [[deps.InlineStrings]]
 deps = ["Parsers"]
-git-tree-sha1 = "a8671d5c9670a62cb36b7d44c376bdb09181aa26"
+git-tree-sha1 = "d19f9edd8c34760dca2de2b503f969d8700ed288"
 uuid = "842dd82b-1e85-43dc-bf29-5d0ee9dffc48"
-version = "1.1.3"
+version = "1.1.4"
 
 [[deps.InplaceOps]]
 deps = ["LinearAlgebra", "Test"]
@@ -943,9 +943,9 @@ version = "2022.0.0+0"
 
 [[deps.MLJModelInterface]]
 deps = ["Random", "ScientificTypesBase", "StatisticalTraits"]
-git-tree-sha1 = "b8073fe6973dcfad5fec803dabc1d3a7f6c4ebc8"
+git-tree-sha1 = "b40406d53e5805b709159f3d510a12339318eb98"
 uuid = "e80e1ace-859a-464e-9ed9-23947d8ae3ea"
-version = "1.4.3"
+version = "1.4.4"
 
 [[deps.MacroTools]]
 deps = ["Markdown", "Random"]
@@ -1158,9 +1158,9 @@ version = "8.44.0+0"
 
 [[deps.PDMats]]
 deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
-git-tree-sha1 = "ca433b9e2f5ca3a0ce6702a032fce95a3b6e1e48"
+git-tree-sha1 = "9351c1a6c0e922cc862bd96822a98c9029a6d142"
 uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
-version = "0.11.14"
+version = "0.11.15"
 
 [[deps.PNGFiles]]
 deps = ["Base64", "CEnum", "ImageCore", "IndirectArrays", "OffsetArrays", "libpng_jll"]
@@ -1456,9 +1456,9 @@ uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [[deps.SpecialFunctions]]
 deps = ["ChainRulesCore", "IrrationalConstants", "LogExpFunctions", "OpenLibm_jll", "OpenSpecFun_jll"]
-git-tree-sha1 = "a9e798cae4867e3a41cae2dd9eb60c047f1212db"
+git-tree-sha1 = "d75bda01f8c31ebb72df80a46c88b25d1c79c56d"
 uuid = "276daf66-3868-5448-9aa4-cd146d93841b"
-version = "2.1.6"
+version = "2.1.7"
 
 [[deps.SplittablesBase]]
 deps = ["Setfield", "Test"]
