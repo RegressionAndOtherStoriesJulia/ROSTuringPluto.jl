@@ -99,9 +99,9 @@ let
 	ax = Axis(f[1, 1]; title="Regression of fake data.", xlabel="fake.x", ylabel="fake.y")
 	scatter!(fake.x, fake.y)
 	x = 1:0.01:20
-	y = ms6_1t["a", "median"] .+  ms6_1t["b", "median"] .* x
+	y = ms6_1t("a", "median") .+  ms6_1t("b", "median") .* x
 	lines!(x, y)
-	â, b̂, σ̂  = round.(ms6_1t[:, "median"]; digits=2)
+	â, b̂, σ̂  = round.(ms6_1t.df[:, "median"]; digits=2)
 	annotations!("y = $(â) + $(b̂) * x + ϵ"; position=(5, 0.8))
 	
 	ax = Axis(f[1, 2]; title="Regression of fake data.", subtitle="(using the link() function)",
@@ -116,7 +116,7 @@ let
 end
 
 # ╔═╡ 9a2ec98b-6f45-4bc2-8ac0-5d6337cfb644
-DataFrame(parameters = Symbol.(names(post6_1t)), simulated = [0.2, 0.3, 0.5], median = ms6_1t[:, "median"], mad_sd = ms6_1t[:, "mad_sd"])
+DataFrame(parameters = Symbol.(names(post6_1t)), simulated = [0.2, 0.3, 0.5], median = ms6_1t.df[:, "median"], mad_sd = ms6_1t.df[:, "mad_sd"])
 
 # ╔═╡ bc877661-9aa0-425d-88e0-b82239c2552c
 md" ### 6.3 Interpret coefficients as comparisons, not effects."
@@ -129,27 +129,6 @@ end
 
 # ╔═╡ 197b0a6a-7c1c-4aad-b9ba-5743c02169fc
 describe(earnings[:, [:earnk, :height, :male]])
-
-# ╔═╡ 21eb651a-8914-4217-bdef-f60badd30d9c
-stan6_2 = "
-data {
-	int N;
-	vector[N] male;
-	vector[N] height;
-	vector[N] earnk;
-}
-parameters {
-	real a;
-	real b;
-	real c;
-	real<lower=0> sigma;
-}
-model {
-	vector[N] mu;
-	sigma ~ exponential(1);
-	mu = a + b * height + c * male;
-	earnk ~ normal(mu, sigma);
-}";
 
 # ╔═╡ 696dcadc-7b10-4095-b165-2dcde9f89001
 @model function ppl6_2(male, height, earnk)
@@ -178,7 +157,7 @@ end
 
 # ╔═╡ 9727012b-1b76-4cde-84ef-bdd7bfa4b025
 let
-	â, b̂, ĉ, σ̂ = round.(ms6_2t[:, "median"]; digits=2)
+	â, b̂, ĉ, σ̂ = round.(ms6_2t.df[:, "median"]; digits=2)
 
 	fig = Figure()
 	
@@ -201,7 +180,7 @@ let
 end	
 
 # ╔═╡ ec3f566f-278c-4342-a365-db379b7d54aa
-R2 = 1 - ms6_2t["σ", "mean"]^2 / std(earnings.earnk)^2
+R2 = 1 - ms6_2t("σ", "mean")^2 / std(earnings.earnk)^2
 
 # ╔═╡ c752672e-56de-4498-a85d-e3dffdc254d6
 md" ### 6.4 Historical origins of regression."
@@ -410,7 +389,7 @@ GLM = "~1.8.0"
 GLMakie = "~0.6.8"
 Makie = "~0.17.8"
 Optim = "~1.7.0"
-RegressionAndOtherStories = "~0.4.7"
+RegressionAndOtherStories = "~0.5.1"
 Turing = "~0.21.9"
 """
 
@@ -834,10 +813,10 @@ uuid = "c87230d0-a227-11e9-1b43-d7ebe4e7570a"
 version = "0.4.1"
 
 [[deps.FFMPEG_jll]]
-deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers", "LAME_jll", "Libdl", "Ogg_jll", "OpenSSL_jll", "Opus_jll", "Pkg", "Zlib_jll", "libass_jll", "libfdk_aac_jll", "libvorbis_jll", "x264_jll", "x265_jll"]
-git-tree-sha1 = "d8a578692e3077ac998b50c0217dfd67f21d1e5f"
+deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers", "LAME_jll", "Libdl", "Ogg_jll", "OpenSSL_jll", "Opus_jll", "Pkg", "Zlib_jll", "libaom_jll", "libass_jll", "libfdk_aac_jll", "libvorbis_jll", "x264_jll", "x265_jll"]
+git-tree-sha1 = "ccd479984c7838684b3ac204b716c89955c76623"
 uuid = "b22a6f82-2f65-5046-a5b2-351ab43fb4e5"
-version = "4.4.0+0"
+version = "4.4.2+0"
 
 [[deps.FFTW]]
 deps = ["AbstractFFTs", "FFTW_jll", "LinearAlgebra", "MKL_jll", "Preferences", "Reexport"]
@@ -1687,9 +1666,9 @@ version = "1.2.2"
 
 [[deps.RegressionAndOtherStories]]
 deps = ["CSV", "CategoricalArrays", "DataFrames", "DataStructures", "Dates", "DelimitedFiles", "Distributions", "DocStringExtensions", "GLM", "LaTeXStrings", "LinearAlgebra", "NamedArrays", "NamedTupleTools", "Parameters", "Random", "Reexport", "Requires", "Statistics", "StatsBase", "StatsFuns", "Unicode"]
-git-tree-sha1 = "439538fecda9677fbd10b379a57ed3b17a444689"
+git-tree-sha1 = "6d66ef145955d46a93708e78964fdb8579f5d6dc"
 uuid = "21324389-b050-441a-ba7b-9a837781bda0"
-version = "0.4.7"
+version = "0.5.1"
 
 [[deps.RelocatableFolders]]
 deps = ["SHA", "Scratch"]
@@ -2103,6 +2082,12 @@ git-tree-sha1 = "51b5eeb3f98367157a7a12a1fb0aa5328946c03c"
 uuid = "9a68df92-36a6-505f-a73e-abb412b6bfb4"
 version = "0.2.3+0"
 
+[[deps.libaom_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "3a2ea60308f0996d26f1e5354e10c24e9ef905d4"
+uuid = "a4ae2306-e953-59d6-aa16-d00cac43593b"
+version = "3.4.0+0"
+
 [[deps.libass_jll]]
 deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "HarfBuzz_jll", "JLLWrappers", "Libdl", "Pkg", "Zlib_jll"]
 git-tree-sha1 = "5982a94fcba20f02f42ace44b9894ee2b140fe47"
@@ -2179,7 +2164,6 @@ version = "3.5.0+0"
 # ╟─bc877661-9aa0-425d-88e0-b82239c2552c
 # ╠═6e6c65b3-f7ad-4a7f-91fd-f065e7bd7ffe
 # ╠═197b0a6a-7c1c-4aad-b9ba-5743c02169fc
-# ╠═21eb651a-8914-4217-bdef-f60badd30d9c
 # ╠═696dcadc-7b10-4095-b165-2dcde9f89001
 # ╠═103de138-886b-446d-8752-255f9db9d978
 # ╠═7c96df85-6981-45dc-a912-311e1c4fbad1

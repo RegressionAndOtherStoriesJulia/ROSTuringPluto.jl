@@ -115,30 +115,9 @@ let
 	ax = Axis(f[1, 1]; title="KidIQ data: kid_score ~ mom_hs")
 	scatter!(kidiq[kidiq.mom_hs .== 0, :mom_hs], kidiq[kidiq.mom_hs .== 0, :kid_score]; color=:red, markersize = 3)
 	scatter!(kidiq[kidiq.mom_hs .== 1, :mom_hs], kidiq[kidiq.mom_hs .== 1, :kid_score]; color=:blue, markersize = 3)
-	lines!([0.0, 1.0], [ms10_1t[:a, :median], ms10_1t[:a, :median] + ms10_1t[:b, :median]])
+	lines!([0.0, 1.0], [ms10_1t(:a, :median), ms10_1t(:a, :median) + ms10_1t(:b, :median)])
 	current_figure()
 end
-
-# ╔═╡ e348f77e-708f-43ed-863e-795330637846
-stan10_2 = "
-data {
-	int N;
-	vector[N] mom_iq;
-	vector[N] kid_score;
-}
-parameters {
-	real a;
-	real b;
-	real sigma;
-}
-model {
-	vector[N] mu;
-	a ~ normal(25, 3);
-	b ~ normal(1, 2);
-	mu = a + b * mom_iq;
-	kid_score ~ normal(mu, sigma);
-}
-";
 
 # ╔═╡ 3e15c7db-6c76-47a9-af3f-66a2eb67a8aa
 @model function ppl10_2(x, y)
@@ -171,33 +150,9 @@ let
 	scatter!(kidiq[kidiq.mom_hs .== 0, :mom_iq], kidiq[kidiq.mom_hs .== 0, :kid_score]; color=:red, markersize = 3)
 	scatter!(kidiq[kidiq.mom_hs .== 1, :mom_iq], kidiq[kidiq.mom_hs .== 1, :kid_score]; color=:blue, markersize = 3)
 	x = LinRange(70.0, 140.0, 100)
-	lines!(x, ms10_2t[:a, :median] .+ ms10_2t[:b, :median] .* x)
+	lines!(x, ms10_2t(:a, :median) .+ ms10_2t(:b, :median) .* x)
 	current_figure()
 end
-
-# ╔═╡ 1204cbcb-a765-461e-a477-ae3d9913b1bf
-stan10_3 = "
-data {
-	int N;
-	vector[N] mom_hs;
-	vector[N] mom_iq;
-	vector[N] kid_score;
-}
-parameters {
-	real a;
-	real b;
-	real c;
-	real sigma;
-}
-model {
-	vector[N] mu;
-	a ~ normal(25, 2);
-	b ~ normal(5, 2);
-	c ~ normal(1, 2);
-	mu = a + b * mom_hs + c * mom_iq;
-	kid_score ~ normal(mu, sigma);
-}
-";
 
 # ╔═╡ bcf8c679-0e35-42e7-b4dd-91ac8dfb5721
 @model function ppl10_3(x, y, z)
@@ -237,10 +192,10 @@ let
 	sca1 = scatter!(kidiq[kidiq.mom_hs .== 0, :mom_iq], kidiq[kidiq.mom_hs .== 0, :kid_score]; color=:red, markersize = 3)
 	sca2 = scatter!(kidiq[kidiq.mom_hs .== 1, :mom_iq], kidiq[kidiq.mom_hs .== 1, :kid_score]; color=:blue, markersize = 3)
 	x = sort(kidiq.mom_iq[nohs])
-	lin1 =lines!(x, ms10_3t[:a, :median] .+ ms10_3t[:b, :median] .* kidiq.mom_hs[nohs] .+ ms10_3t[:c, :median] .* x; 
+	lin1 =lines!(x, ms10_3t(:a, :median) .+ ms10_3t(:b, :median) .* kidiq.mom_hs[nohs] .+ ms10_3t(:c, :median) .* x; 
 		color=:darkred)
 	x = sort(kidiq.mom_iq[hs])
-	lin2 =lines!(x, ms10_3t[:a, :median] .+ ms10_3t[:b, :median] .* kidiq.mom_hs[hs] .+ ms10_3t[:c, :median] .* x; 	
+	lin2 =lines!(x, ms10_3t(:a, :median) .+ ms10_3t(:b, :median) .* kidiq.mom_hs[hs] .+ ms10_3t(:c, :median) .* x; 	
 		color=:darkblue)
 	Legend(f[1, 2],
     	[sca1, sca2, lin1, lin2],
@@ -269,7 +224,7 @@ GLM = "~1.8.0"
 GLMakie = "~0.6.8"
 Makie = "~0.17.8"
 Optim = "~1.7.0"
-RegressionAndOtherStories = "~0.4.7"
+RegressionAndOtherStories = "~0.5.1"
 Turing = "~0.21.9"
 """
 
@@ -693,10 +648,10 @@ uuid = "c87230d0-a227-11e9-1b43-d7ebe4e7570a"
 version = "0.4.1"
 
 [[deps.FFMPEG_jll]]
-deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers", "LAME_jll", "Libdl", "Ogg_jll", "OpenSSL_jll", "Opus_jll", "Pkg", "Zlib_jll", "libass_jll", "libfdk_aac_jll", "libvorbis_jll", "x264_jll", "x265_jll"]
-git-tree-sha1 = "d8a578692e3077ac998b50c0217dfd67f21d1e5f"
+deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers", "LAME_jll", "Libdl", "Ogg_jll", "OpenSSL_jll", "Opus_jll", "Pkg", "Zlib_jll", "libaom_jll", "libass_jll", "libfdk_aac_jll", "libvorbis_jll", "x264_jll", "x265_jll"]
+git-tree-sha1 = "ccd479984c7838684b3ac204b716c89955c76623"
 uuid = "b22a6f82-2f65-5046-a5b2-351ab43fb4e5"
-version = "4.4.0+0"
+version = "4.4.2+0"
 
 [[deps.FFTW]]
 deps = ["AbstractFFTs", "FFTW_jll", "LinearAlgebra", "MKL_jll", "Preferences", "Reexport"]
@@ -1546,9 +1501,9 @@ version = "1.2.2"
 
 [[deps.RegressionAndOtherStories]]
 deps = ["CSV", "CategoricalArrays", "DataFrames", "DataStructures", "Dates", "DelimitedFiles", "Distributions", "DocStringExtensions", "GLM", "LaTeXStrings", "LinearAlgebra", "NamedArrays", "NamedTupleTools", "Parameters", "Random", "Reexport", "Requires", "Statistics", "StatsBase", "StatsFuns", "Unicode"]
-git-tree-sha1 = "439538fecda9677fbd10b379a57ed3b17a444689"
+git-tree-sha1 = "6d66ef145955d46a93708e78964fdb8579f5d6dc"
 uuid = "21324389-b050-441a-ba7b-9a837781bda0"
-version = "0.4.7"
+version = "0.5.1"
 
 [[deps.RelocatableFolders]]
 deps = ["SHA", "Scratch"]
@@ -1962,6 +1917,12 @@ git-tree-sha1 = "51b5eeb3f98367157a7a12a1fb0aa5328946c03c"
 uuid = "9a68df92-36a6-505f-a73e-abb412b6bfb4"
 version = "0.2.3+0"
 
+[[deps.libaom_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "3a2ea60308f0996d26f1e5354e10c24e9ef905d4"
+uuid = "a4ae2306-e953-59d6-aa16-d00cac43593b"
+version = "3.4.0+0"
+
 [[deps.libass_jll]]
 deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "HarfBuzz_jll", "JLLWrappers", "Libdl", "Pkg", "Zlib_jll"]
 git-tree-sha1 = "5982a94fcba20f02f42ace44b9894ee2b140fe47"
@@ -2033,12 +1994,10 @@ version = "3.5.0+0"
 # ╠═a9fcb0f0-5134-48a8-8d93-bfb8203e089e
 # ╠═9073f433-fbec-4cf7-8ef0-ba870854eb75
 # ╠═b77b121b-38d3-485c-a9a2-c9ae87fe3423
-# ╠═e348f77e-708f-43ed-863e-795330637846
 # ╠═3e15c7db-6c76-47a9-af3f-66a2eb67a8aa
 # ╠═358093fe-3102-4c21-be0a-5d33569c13fd
 # ╠═f4ab1e3d-8f64-4415-a257-63e9d43c60db
 # ╠═90f0236a-2c5b-4ea8-83cf-490037bf8c15
-# ╠═1204cbcb-a765-461e-a477-ae3d9913b1bf
 # ╠═bcf8c679-0e35-42e7-b4dd-91ac8dfb5721
 # ╠═b1c6c6a5-1784-438a-b930-49ce7aef80ab
 # ╠═b6330c4f-8129-4bbd-aa39-3ddd00c062b5

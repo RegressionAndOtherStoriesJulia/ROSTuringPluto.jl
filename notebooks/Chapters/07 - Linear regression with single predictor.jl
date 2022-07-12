@@ -209,8 +209,8 @@ function sim(ppl)
 	chns7_2t = sample(m7_2t, NUTS(), MCMCThreads(), 1000, 4)
 	post7_2t = DataFrame(chns7_2t)[:, 3:5]
 	ms = model_summary(post7_2t, Symbol.([:a, :b, :sigma]))
-	b̂ = ms[:b, :mean] 
-	b_se = ms[:b, :std]
+	b̂ = ms(:b, :mean) 
+	b_se = ms(:b, :std)
 
 	(
 		b̂ = b̂, 
@@ -340,7 +340,7 @@ let
 	ax = Axis(f[1, 1]; title="Least-squares regression on an indicator is\nthe same as computing a difference in means",
 	xlabel="Indicator, x", ylabel="y")
 	x_range = LinRange(0, 1, 100)
-	â, b̂, σ̂ = sm7_3ct[:, :median]
+	â, b̂, σ̂ = sm7_3ct.df[:, :median]
 
 	y = â .+ b̂ .* x_range
 	lines!(x_range, y)
@@ -379,7 +379,7 @@ GLM = "~1.8.0"
 GLMakie = "~0.6.8"
 Makie = "~0.17.8"
 Optim = "~1.7.0"
-RegressionAndOtherStories = "~0.4.7"
+RegressionAndOtherStories = "~0.5.1"
 Turing = "~0.21.9"
 """
 
@@ -803,10 +803,10 @@ uuid = "c87230d0-a227-11e9-1b43-d7ebe4e7570a"
 version = "0.4.1"
 
 [[deps.FFMPEG_jll]]
-deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers", "LAME_jll", "Libdl", "Ogg_jll", "OpenSSL_jll", "Opus_jll", "Pkg", "Zlib_jll", "libass_jll", "libfdk_aac_jll", "libvorbis_jll", "x264_jll", "x265_jll"]
-git-tree-sha1 = "d8a578692e3077ac998b50c0217dfd67f21d1e5f"
+deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers", "LAME_jll", "Libdl", "Ogg_jll", "OpenSSL_jll", "Opus_jll", "Pkg", "Zlib_jll", "libaom_jll", "libass_jll", "libfdk_aac_jll", "libvorbis_jll", "x264_jll", "x265_jll"]
+git-tree-sha1 = "ccd479984c7838684b3ac204b716c89955c76623"
 uuid = "b22a6f82-2f65-5046-a5b2-351ab43fb4e5"
-version = "4.4.0+0"
+version = "4.4.2+0"
 
 [[deps.FFTW]]
 deps = ["AbstractFFTs", "FFTW_jll", "LinearAlgebra", "MKL_jll", "Preferences", "Reexport"]
@@ -1656,9 +1656,9 @@ version = "1.2.2"
 
 [[deps.RegressionAndOtherStories]]
 deps = ["CSV", "CategoricalArrays", "DataFrames", "DataStructures", "Dates", "DelimitedFiles", "Distributions", "DocStringExtensions", "GLM", "LaTeXStrings", "LinearAlgebra", "NamedArrays", "NamedTupleTools", "Parameters", "Random", "Reexport", "Requires", "Statistics", "StatsBase", "StatsFuns", "Unicode"]
-git-tree-sha1 = "439538fecda9677fbd10b379a57ed3b17a444689"
+git-tree-sha1 = "6d66ef145955d46a93708e78964fdb8579f5d6dc"
 uuid = "21324389-b050-441a-ba7b-9a837781bda0"
-version = "0.4.7"
+version = "0.5.1"
 
 [[deps.RelocatableFolders]]
 deps = ["SHA", "Scratch"]
@@ -2071,6 +2071,12 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "51b5eeb3f98367157a7a12a1fb0aa5328946c03c"
 uuid = "9a68df92-36a6-505f-a73e-abb412b6bfb4"
 version = "0.2.3+0"
+
+[[deps.libaom_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "3a2ea60308f0996d26f1e5354e10c24e9ef905d4"
+uuid = "a4ae2306-e953-59d6-aa16-d00cac43593b"
+version = "3.4.0+0"
 
 [[deps.libass_jll]]
 deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "HarfBuzz_jll", "JLLWrappers", "Libdl", "Pkg", "Zlib_jll"]

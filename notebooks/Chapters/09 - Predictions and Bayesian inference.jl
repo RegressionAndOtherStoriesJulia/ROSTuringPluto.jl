@@ -162,32 +162,6 @@ let
 	global sexratio = DataFrame(x = x, y = y)
 end
 
-# ╔═╡ f0f4e685-8cfd-4c8d-b93a-a4b04c3ef2c4
-stan9_1 = "
-data {
-	int<lower=1> N; // total number of observations
-	vector[N] x;    // Independent variable: growth
-	vector[N] y;    // Dependent variable: votes 
-}
-parameters {
-	real b;              // Coefficient independent variable
-	real a;              // Intercept
-	real<lower=0> sigma; // dispersion parameter
-}
-model {
-	vector[N] mu;
-
-	// priors including constants
-	a ~ normal(50, 5);
-	b ~ normal(0, 5);
-  	sigma ~ uniform(0, 10);
-
-	mu = a + b * x;
-
-	// likelihood including constants
-	y ~ normal(mu, sigma);
-}";
-
 # ╔═╡ 792c5de9-b6c1-4490-95db-a3f60a09357c
 @model function ppl9_1(x, y)
 	a ~ Normal(50, 5)
@@ -235,32 +209,6 @@ let
 	lines!(x_range, y, color = :red)
 	fig
 end
-
-# ╔═╡ dffa112b-0741-4c7e-9067-70879f6b8d56
-stan9_2 = "
-data {
-	int<lower=1> N; // total number of observations
-	vector[N] x;    // Independent variable: growth
-	vector[N] y;    // Dependent variable: votes 
-}
-parameters {
-	real b;              // Coefficient independent variable
-	real a;              // Intercept
-	real<lower=0> sigma; // dispersion parameter
-}
-model {
-	vector[N] mu;
-
-	// priors including constants
-	a ~ normal(48.8, 0.2);
-	b ~ normal(0, 0.2);
-  	sigma ~ uniform(0, 10);
-
-	mu = a + b * x;
-
-	// likelihood including constants
-	y ~ normal(mu, sigma);
-}";
 
 # ╔═╡ 3b0446c1-7f78-4219-81ca-120533bdccbf
 @model function ppl9_2(x, y)
@@ -401,7 +349,7 @@ GLM = "~1.8.0"
 GLMakie = "~0.6.8"
 Makie = "~0.17.8"
 Optim = "~1.7.0"
-RegressionAndOtherStories = "~0.4.7"
+RegressionAndOtherStories = "~0.5.1"
 Turing = "~0.21.9"
 """
 
@@ -825,10 +773,10 @@ uuid = "c87230d0-a227-11e9-1b43-d7ebe4e7570a"
 version = "0.4.1"
 
 [[deps.FFMPEG_jll]]
-deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers", "LAME_jll", "Libdl", "Ogg_jll", "OpenSSL_jll", "Opus_jll", "Pkg", "Zlib_jll", "libass_jll", "libfdk_aac_jll", "libvorbis_jll", "x264_jll", "x265_jll"]
-git-tree-sha1 = "d8a578692e3077ac998b50c0217dfd67f21d1e5f"
+deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers", "LAME_jll", "Libdl", "Ogg_jll", "OpenSSL_jll", "Opus_jll", "Pkg", "Zlib_jll", "libaom_jll", "libass_jll", "libfdk_aac_jll", "libvorbis_jll", "x264_jll", "x265_jll"]
+git-tree-sha1 = "ccd479984c7838684b3ac204b716c89955c76623"
 uuid = "b22a6f82-2f65-5046-a5b2-351ab43fb4e5"
-version = "4.4.0+0"
+version = "4.4.2+0"
 
 [[deps.FFTW]]
 deps = ["AbstractFFTs", "FFTW_jll", "LinearAlgebra", "MKL_jll", "Preferences", "Reexport"]
@@ -1678,9 +1626,9 @@ version = "1.2.2"
 
 [[deps.RegressionAndOtherStories]]
 deps = ["CSV", "CategoricalArrays", "DataFrames", "DataStructures", "Dates", "DelimitedFiles", "Distributions", "DocStringExtensions", "GLM", "LaTeXStrings", "LinearAlgebra", "NamedArrays", "NamedTupleTools", "Parameters", "Random", "Reexport", "Requires", "Statistics", "StatsBase", "StatsFuns", "Unicode"]
-git-tree-sha1 = "439538fecda9677fbd10b379a57ed3b17a444689"
+git-tree-sha1 = "6d66ef145955d46a93708e78964fdb8579f5d6dc"
 uuid = "21324389-b050-441a-ba7b-9a837781bda0"
-version = "0.4.7"
+version = "0.5.1"
 
 [[deps.RelocatableFolders]]
 deps = ["SHA", "Scratch"]
@@ -2094,6 +2042,12 @@ git-tree-sha1 = "51b5eeb3f98367157a7a12a1fb0aa5328946c03c"
 uuid = "9a68df92-36a6-505f-a73e-abb412b6bfb4"
 version = "0.2.3+0"
 
+[[deps.libaom_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "3a2ea60308f0996d26f1e5354e10c24e9ef905d4"
+uuid = "a4ae2306-e953-59d6-aa16-d00cac43593b"
+version = "3.4.0+0"
+
 [[deps.libass_jll]]
 deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "HarfBuzz_jll", "JLLWrappers", "Libdl", "Pkg", "Zlib_jll"]
 git-tree-sha1 = "5982a94fcba20f02f42ace44b9894ee2b140fe47"
@@ -2170,12 +2124,10 @@ version = "3.5.0+0"
 # ╠═6da20da7-28f0-4930-8165-419ba7df337a
 # ╟─ae84cab6-c439-49b2-9028-9c2fed142833
 # ╠═28ad5de7-c040-4e82-abc0-c4bbd50f2207
-# ╠═f0f4e685-8cfd-4c8d-b93a-a4b04c3ef2c4
 # ╠═792c5de9-b6c1-4490-95db-a3f60a09357c
 # ╠═716cd60e-d66b-4fd0-9143-9d77e0cfd3b4
 # ╠═7951b61f-b423-4ac4-a728-70c8bb6c60c8
 # ╠═e1bec0a3-1319-4fb2-be67-e6a91b57dae7
-# ╠═dffa112b-0741-4c7e-9067-70879f6b8d56
 # ╠═3b0446c1-7f78-4219-81ca-120533bdccbf
 # ╠═a66eb13a-9cdf-4b07-ae96-9f5943e58e84
 # ╠═09897d91-2fad-479f-b0eb-eceec4f66894

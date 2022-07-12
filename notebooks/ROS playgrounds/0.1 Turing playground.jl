@@ -158,12 +158,10 @@ md"
 Mostly I disable logging early on in notebooks using Turing. But it is also possible to do this `by cell`. Click on the little circle with 3 dots at the top of the selected cell and select `Hide logs`."
 
 # ╔═╡ ff355e32-acfd-44bc-ba5c-85d925c98aff
-begin
-	post1_1t = DataFrame(chns1_1t)[:, [:a, :b, :σ]]
-end
+post1_1t = DataFrame(chns1_1t)[:, [:a, :b, :σ]]
 
-# ╔═╡ f52534b9-80e8-4d55-a826-8deccd1c0ee6
-describe(chns1_1t)
+# ╔═╡ adc0d41e-0f9c-4595-9768-122b05f3e1a4
+ms1_1t = model_summary(post1_1t, [:a, :b, :σ])
 
 # ╔═╡ 26d0ea8c-c405-4013-9159-d84690a85080
 plot_chains(post1_1t, [:a, :b, :σ])
@@ -267,7 +265,7 @@ describe(pred_chns1_1t)
 # ╔═╡ 7195be8a-69dc-4efe-8737-30d2c52c5f2e
 begin
 	pred1_1t = DataFrame(pred_chns1_1t)[:, 3:end]
-	ms1_1t = model_summary(pred1_1t, names(pred1_1t))
+	ps1_1t = model_summary(pred1_1t, names(pred1_1t))
 end
 
 # ╔═╡ dab4aa24-1240-4799-a6e1-7474c6a8d2bc
@@ -291,235 +289,8 @@ end
 # ╔═╡ 5319905b-214d-47f6-9030-767e29ab21b3
 Array(group(pred_chns1_1t, :vote))
 
-# ╔═╡ e64b11fd-75a3-4fbc-bff9-468a9a392067
-begin
-	import Base.show
-	mutable struct ModelSummary
-		df::DataFrame;
-	end
-
-	show(ModelSummary) = show(ModelSummary.df)
-
-	function (ms::ModelSummary)(par, stat)
-	
-	    varlocalx = String(par)
-	    varlocaly = String(stat)
-		
-		if !(varlocalx in ms.df.parameters)
-			@warn "Variable \"$(varlocalx)\" not found in $(ms.df.parameters)."
-			return nothing
-		elseif !(varlocaly in names(ms.df))
-			@warn "Variable $(varlocaly) not found in $(names(ms.df))."
-			return nothing
-		end
-	 
-	    return ms.df[ms.df.parameters .== String(varlocalx), String(varlocaly)][1]
-	end
-
-	function model_summary_df(df::DataFrame, params::T; 
-    	round_estimates = true, digits = 3, 
-		table_header_type = eltype(params)) where T <: Vector
-
-	    if !(typeof(params) in [Vector{String}, Vector{Symbol}])
-	        @error "Parameter vector is not a Vector of Strings or Symbols."
-	        return nothing
-	    end
-	
-	    colnames = String.(names(df))
-	    prs = String.(params)
-	
-		pars = String[]
-	    for par in prs
-	        if par in colnames
-	            append!(pars, [par])
-	        else
-	            @warn ":$(par) not in $(colnames), will be dropped."
-	        end
-	    end
-	
-	    if length(pars) > 0
-			dfnew = DataFrame()
-	        dfnew[!, "parameters"] = String.(pars)
-	        estimates = zeros(length(pars), 4)
-	        for (indx, par) in enumerate(pars)
-	            if par in colnames
-	                vals = df[:, par]
-	                estimates[indx, :] = 
-	                    [median(vals), mad(vals, normalize=true),
-	                        mean(vals), std(vals)]
-	            end
-	        end
-	
-	        if round_estimates
-	            estimates = round.(estimates; digits)
-	        end
-	
-			dfnew[!, "median"] = estimates[:, 1]
-			dfnew[!, "mad_sd"] = estimates[:, 2]
-			dfnew[!, "mean"] = estimates[:, 3]
-			dfnew[!, "std"] = estimates[:, 4]
-	    end
-		ModelSummary(dfnew)
-	end
-
-end
-
-# ╔═╡ 48ef6500-b40f-42aa-af1e-527111ab0f45
-begin
-	df = DataFrame()
-	df.parameters = ["a", "b"]
-	df.x = [1, 2]
-	df.y = [3, 4]
-	df.z = [[5, 8], [9,4]]
-	df.a = [[1 2; 3 4], [5 2; 6 7]]
-	df
-end
-
-# ╔═╡ f05d264c-fbd7-49a7-ac34-6e22bd104af2
-ms = ModelSummary(df)
-
-# ╔═╡ 4faa2a07-292a-498e-a2d7-74848e9826de
-function nested_column_to_array(df::DataFrame, var::Union{Symbol, String})
-	if eltype(names(df)) == String
-		varlocal = String(var)
-	    if !(varlocal in String.(names(df)))
-	        @warn "$(var) not found in df."
-	        return nothing
-	    end
-	else
-		varlocal = Symbol(var)
-	    if !(varlocal in Symbol.(names(df)))
-	        @warn "$(var) not found in df."
-	        return nothing
-	    end
-	end	
-
-	if eltype(df[:, varlocal]) <: Vector
-    	m = zeros(nrow(df), length(df[1, varlocal]))
-	    i = 1 # rownumber
-	    for r in eachrow(df[:, var])
-	        m[i, :] = r[1]
-	        i += 1
-	    end
-	elseif eltype(ms.df[:, varlocal]) <: Matrix
-		m = zeros(nrow(df), size(df[1, varlocal], 1), size(df[1, varlocal], 2))
-	    i = 1 # rownumber
-	    for r in eachrow(df[:, var])
-	        m[:, :, i] = r[1]
-	        i += 1
-	    end
-	end
-    m
-end
-
-
-# ╔═╡ 6c0028dc-e235-4b11-be85-c73c7da890fb
-ms("a", "z")
-
-# ╔═╡ fb73710a-a338-4aef-86d8-40936d223d24
-ms("c", "z")
-
-# ╔═╡ 75ef3b93-3d83-459a-aa47-c93397245380
-ms("a", "c")
-
-# ╔═╡ 6a89d0cd-1f99-444d-8325-4c3a3f402398
-ms(:a, :z)
-
-# ╔═╡ b0298a46-cf49-4db0-91c2-0b9b5cfa3671
-ms(:c, :z)
-
-# ╔═╡ 3daa11a8-9a90-429b-8ab0-1071c826aa1e
-ms(:a, :c)
-
-# ╔═╡ 38995776-7836-44f5-813a-596ea923b344
-ms(:a, "z")
-
-# ╔═╡ f25ae047-38d7-4c4c-ac45-5228609282b6
-ms("a", :a)
-
-# ╔═╡ a571e0d9-5815-4321-8875-7622eafd0601
-function nested_column_to_array(ms::ModelSummary, var::Union{Symbol, String})
-	if eltype(names(ms.df)) == String
-		varlocal = String(var)
-	    if !(varlocal in String.(names(ms.df)))
-	        @warn "$(var) not found in ModelSummary object."
-	        return nothing
-	    end
-	else
-		varlocal = Symbol(var)
-	    if !(varlocal in Symbol.(names(ms.df)))
-	        @warn "$(var) not found in ModelSummary object."
-	        return nothing
-	    end
-	end	
-
-	if eltype(df[:, varlocal]) <: Vector
-    	m = zeros(nrow(ms.df), length(ms.df[1, varlocal]))
-	    i = 1 # rownumber
-	    for r in eachrow(ms.df[:, var])
-	        m[i, :] = r[1]
-	        i += 1
-	    end
-	elseif eltype(ms.df[:, varlocal]) <: Matrix
-		m = zeros(nrow(ms.df), size(ms.df[1, varlocal], 1), size(ms.df[1, varlocal], 2))
-	    i = 1 # rownumber
-	    for r in eachrow(ms.df[:, var])
-	        m[:, :, i] = r[1]
-	        i += 1
-	    end
-	end
-    m
-end
-
-
-# ╔═╡ 0da153ee-6f70-40b2-866f-a564df490250
-ms
-
-# ╔═╡ 9580294e-3377-4aa3-910f-f4c2fb50b9be
-nested_column_to_array(ms, :z)
-
-# ╔═╡ a91ca0ad-0fdf-4ab7-ab19-8d1cd469bbb6
-nested_column_to_array(ms.df, :z)
-
-# ╔═╡ 862f4b26-6793-4193-8a0b-ba9c8e87d92c
-nested_column_to_array(ms, "z")
-
-# ╔═╡ f3d68103-c1ec-4922-8347-85280378edea
-nested_column_to_array(ms, "a")
-
-# ╔═╡ 1f813d6f-afbe-46a9-b51c-67388cf66ea3
-nested_column_to_array(ms.df, "a")
-
-# ╔═╡ c0b81996-7161-49f3-aa26-c31de95f3e9b
-nested_column_to_array(ms, :a)
-
-# ╔═╡ 5ba9b7d1-7926-435e-95e7-beefbd440c35
-function errorbars_mean(df, p = [0.055, 0.945])
-	se_df = DataFrame()
-	for (indx, col) in enumerate(eachcol(df))
-		n = length(col)
-		est = mean(col)
-		se = std(col)/sqrt(n)
-		int = [abs.(quantile.(TDist(n-1), p) * se)]
-		append!(se_df, DataFrame(parameters = names(df)[indx], estimate = est, se = se, p = [p], q = int))
-	end
-	se_df
-end
-
 # ╔═╡ 7cb60d65-0dc1-432f-b023-1ce592a5a174
 errorbars_mean(pred1_1t)
-
-# ╔═╡ f978a052-90e1-4166-aea4-8f23ccb681d3
-function errorbars_draws(df, p = [0.25, 0.75])
-	q_df = DataFrame()
-	for (indx, col) in enumerate(eachcol(df))
-    	m = median(col)
-		s = mad(col)
-    	int = [abs.(quantile(col, p) .- m)]
-		append!(q_df, DataFrame(parameters = names(df)[indx], median = m, mad_sd = s, p = [p], q = int))
-	end
-	q_df
-end
 
 # ╔═╡ 45fb3b70-7e67-42fb-aa67-067e06ab68aa
 errorbars_draws(pred1_1t, [0.055, 0.945])
@@ -549,9 +320,6 @@ end
 
 # ╔═╡ 18e9c800-dc0a-4b5e-a50b-18f4f271ee3d
 nested_column_to_array(errorbars_draws(pred1_1t, [0.25, 0.75]), "q")
-
-# ╔═╡ 331b987d-33df-4b48-a05b-8b3aa9369a3e
-model_summary_df(post1_1t, [:a, :b, :σ])
 
 # ╔═╡ 10eb547d-f763-4dfd-8e90-aec59b398823
 md" ###### A quick look at broadcasting and vectorization. See also [more dots](https://julialang.org/blog/2017/01/moredots/) "
@@ -587,7 +355,7 @@ end
 md"#### Compute median and mad."
 
 # ╔═╡ 130040e5-620f-464b-a8b9-ced5fa6caa6f
-ms1_1t["vote[2]", "mad_sd"]
+[ms1_1t(v, "mad_sd") for v in [:a, :b, :σ]]
 
 # ╔═╡ 97df9584-1e89-43e4-9b14-db4eb3fd3c1b
 md" ##### Alternative computation of mad()."
@@ -658,7 +426,7 @@ GLM = "~1.8.0"
 GLMakie = "~0.6.8"
 Makie = "~0.17.8"
 Optim = "~1.7.0"
-RegressionAndOtherStories = "~0.4.7"
+RegressionAndOtherStories = "~0.5.0"
 Turing = "~0.21.9"
 """
 
@@ -668,7 +436,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.9.0-DEV"
 manifest_format = "2.0"
-project_hash = "69f4d6ae19d05ef7cd1e94cdb6a277fe754059ee"
+project_hash = "299636d4eb73cd3dc200c1b6b6214619dead5ae7"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -1013,9 +781,9 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[deps.Distributions]]
 deps = ["ChainRulesCore", "DensityInterface", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Test"]
-git-tree-sha1 = "d530092b57aef8b96b27694e51c575b09c7f0b2e"
+git-tree-sha1 = "429077fd74119f5ac495857fd51f4120baf36355"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.64"
+version = "0.25.65"
 
 [[deps.DistributionsAD]]
 deps = ["Adapt", "ChainRules", "ChainRulesCore", "Compat", "DiffRules", "Distributions", "FillArrays", "LinearAlgebra", "NaNMath", "PDMats", "Random", "Requires", "SpecialFunctions", "StaticArrays", "StatsBase", "StatsFuns", "ZygoteRules"]
@@ -1116,9 +884,9 @@ version = "0.13.2"
 
 [[deps.FiniteDiff]]
 deps = ["ArrayInterfaceCore", "LinearAlgebra", "Requires", "SparseArrays", "StaticArrays"]
-git-tree-sha1 = "ee13c773ce60d9e95a6c6ea134f25605dce2eda3"
+git-tree-sha1 = "e3af8444c9916abed11f4357c2f59b6801e5b376"
 uuid = "6a86dc24-6348-571c-b903-95158fe2bd41"
-version = "2.13.0"
+version = "2.13.1"
 
 [[deps.FixedPointNumbers]]
 deps = ["Statistics"]
@@ -1563,9 +1331,9 @@ version = "2022.0.0+0"
 
 [[deps.MLJModelInterface]]
 deps = ["Random", "ScientificTypesBase", "StatisticalTraits"]
-git-tree-sha1 = "b40406d53e5805b709159f3d510a12339318eb98"
+git-tree-sha1 = "900345c2f9a473f18e79370d7bf41faba49808b7"
 uuid = "e80e1ace-859a-464e-9ed9-23947d8ae3ea"
-version = "1.4.4"
+version = "1.5.1"
 
 [[deps.MacroTools]]
 deps = ["Markdown", "Random"]
@@ -1731,9 +1499,9 @@ version = "0.8.1+0"
 
 [[deps.OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "9a36165cf84cff35851809a40a928e1103702013"
+git-tree-sha1 = "e60321e3f2616584ff98f0a4f18d98ae6f89bbb3"
 uuid = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
-version = "1.1.16+0"
+version = "1.1.17+0"
 
 [[deps.OpenSpecFun_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Pkg"]
@@ -1766,9 +1534,9 @@ version = "8.44.0+0"
 
 [[deps.PDMats]]
 deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
-git-tree-sha1 = "9351c1a6c0e922cc862bd96822a98c9029a6d142"
+git-tree-sha1 = "cf494dca75a69712a72b80bc48f59dcf3dea63ec"
 uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
-version = "0.11.15"
+version = "0.11.16"
 
 [[deps.PNGFiles]]
 deps = ["Base64", "CEnum", "ImageCore", "IndirectArrays", "OffsetArrays", "libpng_jll"]
@@ -1912,9 +1680,9 @@ version = "1.2.1"
 
 [[deps.RecursiveArrayTools]]
 deps = ["Adapt", "ArrayInterfaceCore", "ArrayInterfaceStaticArraysCore", "ChainRulesCore", "DocStringExtensions", "FillArrays", "GPUArraysCore", "LinearAlgebra", "RecipesBase", "StaticArraysCore", "Statistics", "ZygoteRules"]
-git-tree-sha1 = "7ddd4f1ac52f9cc1b784212785f86a75602a7e4b"
+git-tree-sha1 = "7a5f08bdeb79cf3f8ce60125fe1b2a04041c1d26"
 uuid = "731186ca-8d62-57ce-b412-fbd966d074cd"
-version = "2.31.0"
+version = "2.31.1"
 
 [[deps.Reexport]]
 git-tree-sha1 = "45e428421666073eab6f2da5c9d310d99bb12f9b"
@@ -1923,9 +1691,9 @@ version = "1.2.2"
 
 [[deps.RegressionAndOtherStories]]
 deps = ["CSV", "CategoricalArrays", "DataFrames", "DataStructures", "Dates", "DelimitedFiles", "Distributions", "DocStringExtensions", "GLM", "LaTeXStrings", "LinearAlgebra", "NamedArrays", "NamedTupleTools", "Parameters", "Random", "Reexport", "Requires", "Statistics", "StatsBase", "StatsFuns", "Unicode"]
-git-tree-sha1 = "439538fecda9677fbd10b379a57ed3b17a444689"
+git-tree-sha1 = "d0bddd82d52d3ba60931f844954c5a44e6815af6"
 uuid = "21324389-b050-441a-ba7b-9a837781bda0"
-version = "0.4.7"
+version = "0.5.0"
 
 [[deps.RelocatableFolders]]
 deps = ["SHA", "Scratch"]
@@ -1974,9 +1742,9 @@ version = "0.3.2"
 
 [[deps.SciMLBase]]
 deps = ["ArrayInterfaceCore", "CommonSolve", "ConstructionBase", "Distributed", "DocStringExtensions", "IteratorInterfaceExtensions", "LinearAlgebra", "Logging", "Markdown", "RecipesBase", "RecursiveArrayTools", "StaticArraysCore", "Statistics", "Tables", "TreeViews"]
-git-tree-sha1 = "3243a883fa422a0a5cfe2d3b6ea6287fc396018f"
+git-tree-sha1 = "55f38a183d472deb6893bdc3a962a13ea10c60e4"
 uuid = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
-version = "1.42.2"
+version = "1.42.4"
 
 [[deps.ScientificTypesBase]]
 git-tree-sha1 = "a8e18eb383b5ecf1b5e6fc237eb39255044fd92b"
@@ -2081,9 +1849,9 @@ version = "1.0.1"
 
 [[deps.StatisticalTraits]]
 deps = ["ScientificTypesBase"]
-git-tree-sha1 = "271a7fea12d319f23d55b785c51f6876aadb9ac0"
+git-tree-sha1 = "823fb7e68f7a22cfd5dacc73b906dcea723ec807"
 uuid = "64bff920-2084-43da-a3e6-9bb72801c0c9"
-version = "3.0.0"
+version = "3.1.0"
 
 [[deps.Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
@@ -2399,7 +2167,7 @@ version = "3.5.0+0"
 
 # ╔═╡ Cell order:
 # ╟─1f693212-3ac6-4ddf-a524-b571ab062a9e
-# ╠═f693f1fa-1c8f-4274-b9fe-0d3eb8865735
+# ╟─f693f1fa-1c8f-4274-b9fe-0d3eb8865735
 # ╟─edc8ea2f-53c6-4c91-9f3d-9278fac1b89c
 # ╠═64f79bec-b35c-465f-ab94-fe42170bb081
 # ╟─e4d188b3-e77e-4872-9341-9a01aea4d9bd
@@ -2421,7 +2189,7 @@ version = "3.5.0+0"
 # ╠═b3adef33-c111-4d20-b277-a5346eae9f23
 # ╟─13e24eac-d6b1-490d-840c-eec58ed08503
 # ╠═ff355e32-acfd-44bc-ba5c-85d925c98aff
-# ╠═f52534b9-80e8-4d55-a826-8deccd1c0ee6
+# ╠═adc0d41e-0f9c-4595-9768-122b05f3e1a4
 # ╠═26d0ea8c-c405-4013-9159-d84690a85080
 # ╠═1f4e22a4-5fba-4331-9bf9-dd886ce45e74
 # ╟─75ee3adf-2988-4f42-a0b5-21abe5829120
@@ -2438,33 +2206,10 @@ version = "3.5.0+0"
 # ╠═dab4aa24-1240-4799-a6e1-7474c6a8d2bc
 # ╠═364e4670-25fb-4dd2-97fe-40746ecd0029
 # ╠═5319905b-214d-47f6-9030-767e29ab21b3
-# ╠═4faa2a07-292a-498e-a2d7-74848e9826de
-# ╠═e64b11fd-75a3-4fbc-bff9-468a9a392067
-# ╠═48ef6500-b40f-42aa-af1e-527111ab0f45
-# ╠═f05d264c-fbd7-49a7-ac34-6e22bd104af2
-# ╠═6c0028dc-e235-4b11-be85-c73c7da890fb
-# ╠═fb73710a-a338-4aef-86d8-40936d223d24
-# ╠═75ef3b93-3d83-459a-aa47-c93397245380
-# ╠═6a89d0cd-1f99-444d-8325-4c3a3f402398
-# ╠═b0298a46-cf49-4db0-91c2-0b9b5cfa3671
-# ╠═3daa11a8-9a90-429b-8ab0-1071c826aa1e
-# ╠═38995776-7836-44f5-813a-596ea923b344
-# ╠═f25ae047-38d7-4c4c-ac45-5228609282b6
-# ╠═a571e0d9-5815-4321-8875-7622eafd0601
-# ╠═0da153ee-6f70-40b2-866f-a564df490250
-# ╠═9580294e-3377-4aa3-910f-f4c2fb50b9be
-# ╠═a91ca0ad-0fdf-4ab7-ab19-8d1cd469bbb6
-# ╠═862f4b26-6793-4193-8a0b-ba9c8e87d92c
-# ╠═f3d68103-c1ec-4922-8347-85280378edea
-# ╠═1f813d6f-afbe-46a9-b51c-67388cf66ea3
-# ╠═c0b81996-7161-49f3-aa26-c31de95f3e9b
-# ╠═5ba9b7d1-7926-435e-95e7-beefbd440c35
 # ╠═7cb60d65-0dc1-432f-b023-1ce592a5a174
-# ╠═f978a052-90e1-4166-aea4-8f23ccb681d3
 # ╠═45fb3b70-7e67-42fb-aa67-067e06ab68aa
 # ╠═4d1ecd0a-337d-4507-8e38-8195f80d6d99
 # ╠═18e9c800-dc0a-4b5e-a50b-18f4f271ee3d
-# ╠═331b987d-33df-4b48-a05b-8b3aa9369a3e
 # ╟─10eb547d-f763-4dfd-8e90-aec59b398823
 # ╠═f42f37ec-ba00-4053-827e-7a96eb4cc4a4
 # ╠═cb3f7b9d-4438-42a6-b62c-f6ebdf86c134

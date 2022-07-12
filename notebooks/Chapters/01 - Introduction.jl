@@ -462,7 +462,7 @@ end
 let
 	x1 = 1.0:0.01:5.0
 	f = Figure()
-	medians = ms1_2at[:, "median"]
+	medians = [ms1_2at(p, "median") for p in [:a, :b, :σ]]
 	ax = Axis(f[1, 2], title = "Regression on continuous treatment",
 		xlabel = "Treatment level", ylabel = "Outcome")
 	sca1 = scatter!(x, y)
@@ -471,7 +471,7 @@ let
 	lin1 = lines!(x1, medians[1] .+ medians[2] * x1)
 
 	x2 = 0.0:0.01:1.0
-	medians = ms1_2bt[:, "median"]
+	medians = [ms1_2bt(p, "median") for p in [:a, :b, :σ]]
 	ax = Axis(f[1, 1], title="Regression on binary treatment",
 		xlabel = "Treatment", ylabel = "Outcome")
 	sca1 = scatter!(x_binary, y)
@@ -550,10 +550,10 @@ plot_chains(post1_3bt, [:a, :b_exp, :σ])
 trankplot(post1_3bt, "b_exp")
 
 # ╔═╡ 8adff5cd-937c-4ebc-94eb-955f75e93097
-â₁, b̂, σ̂₁ = ms1_3at[:, :median]
+â₁, b̂, σ̂₁ = ms1_3at.df[:, :median]
 
 # ╔═╡ 571df463-1f3c-43d0-8c9e-e9b927694979
-â₂, b̂ₑₓₚ, σ̂₂ = ms1_3bt[:, :median]
+â₂, b̂ₑₓₚ, σ̂₂ = ms1_3bt.df[:, :median]
 
 # ╔═╡ 739b4c23-52db-49ff-9e4c-49188bba8e61
 let
@@ -570,12 +570,6 @@ let
 	f
 end
 
-
-# ╔═╡ bbdb71e9-01f8-4925-8707-b13df2917706
-â₂
-
-# ╔═╡ 6117eb00-9b5a-4a1e-bb5a-cf572ece8ee0
-b̂ₑₓₚ
 
 # ╔═╡ 0dfa1d16-25de-4eee-8595-1bc1425492ab
 begin
@@ -674,7 +668,7 @@ begin
 end
 
 # ╔═╡ 48195273-05ff-4454-93f0-00df2332f7e8
-ms1_4t[:b, :median]
+ms1_4t(:b, :median)
 
 # ╔═╡ b87a84a5-4513-4f7d-b809-25ccb772fc5d
 plot_chains(post1_4t, [:a, :b, :c])
@@ -741,7 +735,7 @@ GLM = "~1.8.0"
 GLMakie = "~0.6.8"
 Makie = "~0.17.8"
 Optim = "~1.7.0"
-RegressionAndOtherStories = "~0.4.7"
+RegressionAndOtherStories = "~0.5.0"
 Turing = "~0.21.9"
 """
 
@@ -751,7 +745,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.9.0-DEV"
 manifest_format = "2.0"
-project_hash = "3069cbe7bdbf06fa2ed13b90414a68526987723d"
+project_hash = "85d0d9c12c5a7818aa41b062acfda534dc965936"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -2018,9 +2012,9 @@ version = "1.2.2"
 
 [[deps.RegressionAndOtherStories]]
 deps = ["CSV", "CategoricalArrays", "DataFrames", "DataStructures", "Dates", "DelimitedFiles", "Distributions", "DocStringExtensions", "GLM", "LaTeXStrings", "LinearAlgebra", "NamedArrays", "NamedTupleTools", "Parameters", "Random", "Reexport", "Requires", "Statistics", "StatsBase", "StatsFuns", "Unicode"]
-git-tree-sha1 = "439538fecda9677fbd10b379a57ed3b17a444689"
+git-tree-sha1 = "d0bddd82d52d3ba60931f844954c5a44e6815af6"
 uuid = "21324389-b050-441a-ba7b-9a837781bda0"
-version = "0.4.7"
+version = "0.5.0"
 
 [[deps.RelocatableFolders]]
 deps = ["SHA", "Scratch"]
@@ -2578,8 +2572,6 @@ version = "3.5.0+0"
 # ╠═8adff5cd-937c-4ebc-94eb-955f75e93097
 # ╠═571df463-1f3c-43d0-8c9e-e9b927694979
 # ╠═739b4c23-52db-49ff-9e4c-49188bba8e61
-# ╠═bbdb71e9-01f8-4925-8707-b13df2917706
-# ╠═6117eb00-9b5a-4a1e-bb5a-cf572ece8ee0
 # ╠═0dfa1d16-25de-4eee-8595-1bc1425492ab
 # ╠═f43d2372-c868-4696-8702-1191e97c49f0
 # ╠═b670e644-67d9-4185-8402-6eda661f0d81
