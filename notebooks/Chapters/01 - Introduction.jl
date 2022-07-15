@@ -355,7 +355,7 @@ end;
 
 # ╔═╡ 2ec2b2b1-f1d2-4cd5-a23f-2b80abc5d4cd
 begin
-	f = Figure()
+	local f = Figure()
 	ax = Axis(f[1, 1], title = "With UN peacekeepers",
 		xlabel = "Pre-treatment measure of problems in country", 
 		ylabel = "Delay [yrs] before return to conflict")
@@ -383,12 +383,6 @@ md" ### 1.4 Challenges in building, understanding, and interpreting regression."
 
 # ╔═╡ 783df69c-5368-4a9e-aabf-a46895712289
 md" #### Simple causal"
-
-# ╔═╡ 8f61506c-bccf-4614-b2ae-ce6379f71da7
-md"
-!!! note
-
-In models like below I usually prefer to create 2 separate Stan Language models, one for the continuous case and another for the binary case. But they can be combined in a single model as shown below. I'm using this example to show one way to handle vectors returned from Stan's cmdstan."
 
 # ╔═╡ 4e0a7086-a4af-4d3b-ae98-ec47b458e451
 @model function ppl1_2a(x, y)
@@ -462,7 +456,7 @@ end
 let
 	x1 = 1.0:0.01:5.0
 	f = Figure()
-	medians = [ms1_2at(p, "median") for p in [:a, :b, :σ]]
+	medians = [ms1_2at[p, "median"] for p in [:a, :b, :σ]]
 	ax = Axis(f[1, 2], title = "Regression on continuous treatment",
 		xlabel = "Treatment level", ylabel = "Outcome")
 	sca1 = scatter!(x, y)
@@ -471,7 +465,7 @@ let
 	lin1 = lines!(x1, medians[1] .+ medians[2] * x1)
 
 	x2 = 0.0:0.01:1.0
-	medians = [ms1_2bt(p, "median") for p in [:a, :b, :σ]]
+	medians = [ms1_2bt[p, "median"] for p in [:a, :b, :σ]]
 	ax = Axis(f[1, 1], title="Regression on binary treatment",
 		xlabel = "Treatment", ylabel = "Outcome")
 	sca1 = scatter!(x_binary, y)
@@ -550,10 +544,10 @@ plot_chains(post1_3bt, [:a, :b_exp, :σ])
 trankplot(post1_3bt, "b_exp")
 
 # ╔═╡ 8adff5cd-937c-4ebc-94eb-955f75e93097
-â₁, b̂, σ̂₁ = ms1_3at.df[:, :median]
+â₁, b̂, σ̂₁ = ms1_3at[:, :median]
 
 # ╔═╡ 571df463-1f3c-43d0-8c9e-e9b927694979
-â₂, b̂ₑₓₚ, σ̂₂ = ms1_3bt.df[:, :median]
+â₂, b̂ₑₓₚ, σ̂₂ = ms1_3bt[:, :median]
 
 # ╔═╡ 739b4c23-52db-49ff-9e4c-49188bba8e61
 let
@@ -668,7 +662,7 @@ begin
 end
 
 # ╔═╡ 48195273-05ff-4454-93f0-00df2332f7e8
-ms1_4t(:b, :median)
+ms1_4t[:b, :media]
 
 # ╔═╡ b87a84a5-4513-4f7d-b809-25ccb772fc5d
 plot_chains(post1_4t, [:a, :b, :c])
@@ -732,10 +726,10 @@ Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
 AlgebraOfGraphics = "~0.6.9"
 DrWatson = "~2.9.1"
 GLM = "~1.8.0"
-GLMakie = "~0.6.8"
-Makie = "~0.17.8"
+GLMakie = "~0.6.9"
+Makie = "~0.17.9"
 Optim = "~1.7.0"
-RegressionAndOtherStories = "~0.5.0"
+RegressionAndOtherStories = "~0.6.0"
 Turing = "~0.21.9"
 """
 
@@ -745,7 +739,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.9.0-DEV"
 manifest_format = "2.0"
-project_hash = "85d0d9c12c5a7818aa41b062acfda534dc965936"
+project_hash = "3069cbe7bdbf06fa2ed13b90414a68526987723d"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -911,15 +905,15 @@ version = "0.10.6"
 
 [[deps.ChainRules]]
 deps = ["ChainRulesCore", "Compat", "Distributed", "IrrationalConstants", "LinearAlgebra", "Random", "RealDot", "SparseArrays", "Statistics"]
-git-tree-sha1 = "cc81c5c6bab557f89e4b5951b252d7ab863639a4"
+git-tree-sha1 = "6727845beeb8658b9f0d047712210683b6f6c270"
 uuid = "082447d4-558c-5d27-93f4-14fc19e9eca2"
-version = "1.37.0"
+version = "1.38.0"
 
 [[deps.ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra", "SparseArrays"]
-git-tree-sha1 = "2dd813e5f2f7eec2d1268c57cf2373d3ee91fcea"
+git-tree-sha1 = "ff38036fb7edc903de4e79f32067d8497508616b"
 uuid = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
-version = "1.15.1"
+version = "1.15.2"
 
 [[deps.ChangesOfVariables]]
 deps = ["ChainRulesCore", "LinearAlgebra", "Test"]
@@ -1008,10 +1002,9 @@ uuid = "187b0558-2788-49d3-abe0-74a17ed4e7c9"
 version = "1.4.0"
 
 [[deps.Contour]]
-deps = ["StaticArrays"]
-git-tree-sha1 = "9f02045d934dc030edad45944ea80dbd1f0ebea7"
+git-tree-sha1 = "d05d9e7b7aedff4e5b51a029dced05cfb6125781"
 uuid = "d38c429a-6771-53c6-b99e-75d170b6e991"
-version = "0.5.7"
+version = "0.6.2"
 
 [[deps.Crayons]]
 git-tree-sha1 = "249fe38abf76d48563e2f4556bebd215aa317e15"
@@ -1159,10 +1152,10 @@ uuid = "c87230d0-a227-11e9-1b43-d7ebe4e7570a"
 version = "0.4.1"
 
 [[deps.FFMPEG_jll]]
-deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers", "LAME_jll", "Libdl", "Ogg_jll", "OpenSSL_jll", "Opus_jll", "Pkg", "Zlib_jll", "libass_jll", "libfdk_aac_jll", "libvorbis_jll", "x264_jll", "x265_jll"]
-git-tree-sha1 = "d8a578692e3077ac998b50c0217dfd67f21d1e5f"
+deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers", "LAME_jll", "Libdl", "Ogg_jll", "OpenSSL_jll", "Opus_jll", "Pkg", "Zlib_jll", "libaom_jll", "libass_jll", "libfdk_aac_jll", "libvorbis_jll", "x264_jll", "x265_jll"]
+git-tree-sha1 = "ccd479984c7838684b3ac204b716c89955c76623"
 uuid = "b22a6f82-2f65-5046-a5b2-351ab43fb4e5"
-version = "4.4.0+0"
+version = "4.4.2+0"
 
 [[deps.FFTW]]
 deps = ["AbstractFFTs", "FFTW_jll", "LinearAlgebra", "MKL_jll", "Preferences", "Reexport"]
@@ -1285,9 +1278,9 @@ version = "1.8.0"
 
 [[deps.GLMakie]]
 deps = ["ColorTypes", "Colors", "FileIO", "FixedPointNumbers", "FreeTypeAbstraction", "GLFW", "GeometryBasics", "LinearAlgebra", "Makie", "Markdown", "MeshIO", "ModernGL", "Observables", "Printf", "Serialization", "ShaderAbstractions", "StaticArrays"]
-git-tree-sha1 = "79f9f225a7f0c51a52ed1c299d092bb4fdfbd93f"
+git-tree-sha1 = "1845040be292ddaa258736fdfe852582465f7023"
 uuid = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
-version = "0.6.8"
+version = "0.6.9"
 
 [[deps.GPUArraysCore]]
 deps = ["Adapt"]
@@ -1349,10 +1342,10 @@ uuid = "2e76f6c2-a576-52d4-95c1-20adfe4de566"
 version = "2.8.1+1"
 
 [[deps.HypergeometricFunctions]]
-deps = ["DualNumbers", "LinearAlgebra", "SpecialFunctions", "Test"]
-git-tree-sha1 = "cb7099a0109939f16a4d3b572ba8396b1f6c7c31"
+deps = ["DualNumbers", "LinearAlgebra", "OpenLibm_jll", "SpecialFunctions", "Test"]
+git-tree-sha1 = "709d864e3ed6e3545230601f94e11ebc65994641"
 uuid = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
-version = "0.3.10"
+version = "0.3.11"
 
 [[deps.ImageCore]]
 deps = ["AbstractFFTs", "ColorVectorSpace", "Colors", "FixedPointNumbers", "Graphics", "MappedArrays", "MosaicViews", "OffsetArrays", "PaddedViews", "Reexport"]
@@ -1539,7 +1532,7 @@ version = "0.6.3"
 [[deps.LibCURL_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
-version = "7.83.1+1"
+version = "7.84.0+0"
 
 [[deps.LibGit2]]
 deps = ["Base64", "NetworkOptions", "Printf", "SHA"]
@@ -1652,9 +1645,9 @@ version = "2022.0.0+0"
 
 [[deps.MLJModelInterface]]
 deps = ["Random", "ScientificTypesBase", "StatisticalTraits"]
-git-tree-sha1 = "900345c2f9a473f18e79370d7bf41faba49808b7"
+git-tree-sha1 = "16fa7c2e14aa5b3854bc77ab5f1dbe2cdc488903"
 uuid = "e80e1ace-859a-464e-9ed9-23947d8ae3ea"
-version = "1.5.1"
+version = "1.6.0"
 
 [[deps.MacroTools]]
 deps = ["Markdown", "Random"]
@@ -1664,15 +1657,15 @@ version = "0.5.9"
 
 [[deps.Makie]]
 deps = ["Animations", "Base64", "ColorBrewer", "ColorSchemes", "ColorTypes", "Colors", "Contour", "Distributions", "DocStringExtensions", "FFMPEG", "FileIO", "FixedPointNumbers", "Formatting", "FreeType", "FreeTypeAbstraction", "GeometryBasics", "GridLayoutBase", "ImageIO", "IntervalSets", "Isoband", "KernelDensity", "LaTeXStrings", "LinearAlgebra", "MakieCore", "Markdown", "Match", "MathTeXEngine", "Observables", "OffsetArrays", "Packing", "PlotUtils", "PolygonOps", "Printf", "Random", "RelocatableFolders", "Serialization", "Showoff", "SignedDistanceFields", "SparseArrays", "Statistics", "StatsBase", "StatsFuns", "StructArrays", "UnicodeFun"]
-git-tree-sha1 = "b0946fd8f4f981210980bef0a7ed63ab5fb4206f"
+git-tree-sha1 = "ba72a2f4be8dcce9473a80f0f96c5952ab8d695b"
 uuid = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
-version = "0.17.8"
+version = "0.17.9"
 
 [[deps.MakieCore]]
 deps = ["Observables"]
-git-tree-sha1 = "469221640e5e798b52877fd12c596204cee05df1"
+git-tree-sha1 = "5ad699710cba8b01ca6c6eeb419a6865607c875d"
 uuid = "20f20a25-4f0e-4fdf-b5d1-57303727442b"
-version = "0.3.4"
+version = "0.3.5"
 
 [[deps.MappedArrays]]
 git-tree-sha1 = "e8b359ef06ec72e8c030463fe02efe5527ee5142"
@@ -2012,9 +2005,9 @@ version = "1.2.2"
 
 [[deps.RegressionAndOtherStories]]
 deps = ["CSV", "CategoricalArrays", "DataFrames", "DataStructures", "Dates", "DelimitedFiles", "Distributions", "DocStringExtensions", "GLM", "LaTeXStrings", "LinearAlgebra", "NamedArrays", "NamedTupleTools", "Parameters", "Random", "Reexport", "Requires", "Statistics", "StatsBase", "StatsFuns", "Unicode"]
-git-tree-sha1 = "d0bddd82d52d3ba60931f844954c5a44e6815af6"
+git-tree-sha1 = "4f1838bf559d812e3370425d95df52d123b942cb"
 uuid = "21324389-b050-441a-ba7b-9a837781bda0"
-version = "0.5.0"
+version = "0.6.0"
 
 [[deps.RelocatableFolders]]
 deps = ["SHA", "Scratch"]
@@ -2074,9 +2067,9 @@ version = "3.0.0"
 
 [[deps.Scratch]]
 deps = ["Dates"]
-git-tree-sha1 = "0b4b7f1393cff97c33891da2a0bf69c6ed241fda"
+git-tree-sha1 = "f94f779c94e58bf9ea243e77a37e16d9de9126bd"
 uuid = "6c6a2e73-6563-6170-7368-637461726353"
-version = "1.1.0"
+version = "1.1.1"
 
 [[deps.SentinelArrays]]
 deps = ["Dates", "Random"]
@@ -2159,9 +2152,9 @@ version = "0.1.1"
 
 [[deps.StaticArrays]]
 deps = ["LinearAlgebra", "Random", "StaticArraysCore", "Statistics"]
-git-tree-sha1 = "9f8a5dc5944dc7fbbe6eb4180660935653b0a9d9"
+git-tree-sha1 = "e972716025466461a3dc1588d9168334b71aafff"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "1.5.0"
+version = "1.5.1"
 
 [[deps.StaticArraysCore]]
 git-tree-sha1 = "66fe9eb253f910fe8cf161953880cfdaef01cdf0"
@@ -2170,9 +2163,9 @@ version = "1.0.1"
 
 [[deps.StatisticalTraits]]
 deps = ["ScientificTypesBase"]
-git-tree-sha1 = "823fb7e68f7a22cfd5dacc73b906dcea723ec807"
+git-tree-sha1 = "30b9236691858e13f167ce829490a68e1a597782"
 uuid = "64bff920-2084-43da-a3e6-9bb72801c0c9"
-version = "3.1.0"
+version = "3.2.0"
 
 [[deps.Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
@@ -2428,6 +2421,12 @@ git-tree-sha1 = "51b5eeb3f98367157a7a12a1fb0aa5328946c03c"
 uuid = "9a68df92-36a6-505f-a73e-abb412b6bfb4"
 version = "0.2.3+0"
 
+[[deps.libaom_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "3a2ea60308f0996d26f1e5354e10c24e9ef905d4"
+uuid = "a4ae2306-e953-59d6-aa16-d00cac43593b"
+version = "3.4.0+0"
+
 [[deps.libass_jll]]
 deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "HarfBuzz_jll", "JLLWrappers", "Libdl", "Pkg", "Zlib_jll"]
 git-tree-sha1 = "5982a94fcba20f02f42ace44b9894ee2b140fe47"
@@ -2546,7 +2545,6 @@ version = "3.5.0+0"
 # ╠═2ec2b2b1-f1d2-4cd5-a23f-2b80abc5d4cd
 # ╟─63917762-446c-4230-ae22-d42f0752ff36
 # ╟─783df69c-5368-4a9e-aabf-a46895712289
-# ╟─8f61506c-bccf-4614-b2ae-ce6379f71da7
 # ╠═4e0a7086-a4af-4d3b-ae98-ec47b458e451
 # ╠═4d494a8b-ca6f-4591-9943-de4eecd0c5c1
 # ╟─f3b11aff-58cb-4a2d-9785-1a853dc22797
