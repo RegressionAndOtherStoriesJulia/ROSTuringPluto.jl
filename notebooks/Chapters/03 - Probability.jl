@@ -13,7 +13,7 @@ begin
 	# Specific to this notebook
     using GLM
 
-	# Specific to ROPTuringluto
+	# Specific to ROSTuringPluto
 	using Optim
 	using Logging
     using Turing
