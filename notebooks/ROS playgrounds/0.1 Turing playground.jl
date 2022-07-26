@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.9
+# v0.19.10
 
 using Markdown
 using InteractiveUtils
@@ -19,15 +19,12 @@ begin
 	
 	# Graphics related
     using GLMakie
-    using Makie
-    using AlgebraOfGraphics
 
 	# Common data files and functions
 	using RegressionAndOtherStories
 	import RegressionAndOtherStories: link
 
-	set_aog_theme!()
-	#Logging.disable_logging(Logging.Warn)
+	Logging.disable_logging(Logging.Warn)
 end;
 
 # ╔═╡ 1f693212-3ac6-4ddf-a524-b571ab062a9e
@@ -106,19 +103,17 @@ let
 	ylabel = "Incumbent's party vote share"
 	let
 		title = "Forecasting the election from the economy"
-		plt = data(hibbs) * 
-			mapping(:label => verbatim, (:growth, :vote) => Point) *
-			visual(Annotations, textsize=15)
-		axis = (; title, xlabel, ylabel)
-		draw!(fig[1, 1], plt; axis)
+		ax = Axis(fig[1, 1]; title, xlabel, ylabel)
+		for (ind, yr) in enumerate(hibbs.year)
+			annotations!("$(yr)"; position=(hibbs.growth[ind], hibbs.vote[ind]), textsize=10)
+		end
 	end
 	let
+		x = LinRange(-1, 4, 100)
 		title = "Data and linear fit"
-		cols = mapping(:growth, :vote)
-		scat = visual(Scatter) + linear()
-		plt = data(hibbs) * cols * scat
-		axis = (; title, xlabel, ylabel)
-		draw!(fig[1, 2], plt; axis)
+		ax = Axis(fig[1, 2]; title, xlabel, ylabel)
+		scatter!(hibbs.growth, hibbs.vote)
+		lines!(x, coef(hibbs_lm)[1] .+ coef(hibbs_lm)[2] .* x; color=:darkred)
 		annotations!("vote = 46.2 + 3.0 * growth"; position=(0, 41))
 	end
 	fig
@@ -387,9 +382,10 @@ median(abs.(nt.x .- median(nt.x)))
 
 # ╔═╡ 0e4afc23-5676-401f-a60d-2eab4320abb0
 let
-	plt = data(nt) * mapping(:x) * AlgebraOfGraphics.density()
-	axis = (; title="Density x")
-	draw(plt; axis)
+	fig = Figure()
+	ax = Axis(fig[1, 1]; title = "Density")
+	den = density!(nt.x)
+	fig
 end
 
 # ╔═╡ d7ddd741-fff5-4bdf-8d54-58ec6fd5d90d

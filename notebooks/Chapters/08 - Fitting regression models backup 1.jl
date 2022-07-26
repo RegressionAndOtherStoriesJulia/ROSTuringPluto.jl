@@ -403,7 +403,7 @@ DrWatson = "~2.9.1"
 GLM = "~1.8.0"
 GLMakie = "~0.6.12"
 Optim = "~1.7.0"
-RegressionAndOtherStories = "~0.6.2"
+RegressionAndOtherStories = "~0.6.1"
 StatsAPI = "~1.4.0"
 Turing = "~0.21.9"
 """
@@ -414,7 +414,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.9.0-DEV"
 manifest_format = "2.0"
-project_hash = "3a9a83f4354c718eb8272fa6cc25ab063a98e1d1"
+project_hash = "a8bf8ec4b8130a488b625af6e7ef6d2b81ccb764"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -1640,9 +1640,9 @@ version = "1.2.2"
 
 [[deps.RegressionAndOtherStories]]
 deps = ["CSV", "CategoricalArrays", "DataFrames", "DataStructures", "Dates", "DelimitedFiles", "Distributions", "DocStringExtensions", "GLM", "LaTeXStrings", "LinearAlgebra", "NamedArrays", "NamedTupleTools", "Parameters", "Random", "Reexport", "Requires", "Statistics", "StatsBase", "StatsFuns", "Unicode"]
-git-tree-sha1 = "ce3a2e9dc4c8e779084eaa6fb62d0afce42b3eaa"
+git-tree-sha1 = "6a9f14a42411c4dc61106b9c28dd94e63df788e3"
 uuid = "21324389-b050-441a-ba7b-9a837781bda0"
-version = "0.6.2"
+version = "0.6.1"
 
 [[deps.RelocatableFolders]]
 deps = ["SHA", "Scratch"]

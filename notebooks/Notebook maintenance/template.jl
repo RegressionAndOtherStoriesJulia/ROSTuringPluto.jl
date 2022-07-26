@@ -29,14 +29,11 @@ begin
 	
 	# Graphics related
     using GLMakie
-    using Makie
-    using AlgebraOfGraphics
 
 	# Common data files and functions
 	using RegressionAndOtherStories
 	import RegressionAndOtherStories: link
 
-	set_aog_theme!()
 	Logging.disable_logging(Logging.Warn)
 end;
 
