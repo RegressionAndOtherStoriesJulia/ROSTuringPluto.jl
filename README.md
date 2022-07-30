@@ -13,7 +13,7 @@ This project will contain (work is in early stages of progress!) a set of Pluto 
 
 These notebooks are intended to be used in conjunction with above book.
 
-Each notebook contains a chapter.  In the `notebooks/chapters` directory there are also PDF versions of the chapters created with PlutoPDF (see notes.md).
+Each notebook contains a chapter.  In the `pdfs` directory there are also PDF versions of the chapters created with PlutoPDF (see notes.md).
 
 ## Personal note
 

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.10
+# v0.19.11
 
 using Markdown
 using InteractiveUtils
@@ -19,7 +19,7 @@ begin
 	
 	# Graphics related
     using GLMakie
-
+	
 	# Common data files and functions
 	using RegressionAndOtherStories
 	import RegressionAndOtherStories: link
