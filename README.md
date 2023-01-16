@@ -45,6 +45,4 @@ julia> Pluto.run()
 
 A Pluto page should open in a browser. See [this page](https://www.juliafordatascience.com/first-steps-5-pluto/) for a quick Pluto introduction.
 
-## Usage
-
 Select a notebook in the `open a file` entry box, e.g. type `./` and select `chapters` Select a chapter notebook and press `open`.
