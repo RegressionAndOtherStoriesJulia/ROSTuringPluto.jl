@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.19
+# v0.19.22
 
 using Markdown
 using InteractiveUtils
@@ -42,15 +42,22 @@ notebook_files = [
     "~/.julia/dev/ROSTuringPluto/notebooks/12-Transformations and regression.jl",
     "~/.julia/dev/ROSTuringPluto/notebooks/ROS playgrounds/0.1 Turing playground.jl",
     "~/.julia/dev/ROSTuringPluto/notebooks/ROS playgrounds/0.2 DataFrames playground.jl",
-"~/.julia/dev/ROSTuringPluto/notebooks/Maintenance/Notebook-to-reset-ROSTuringPluto-jl-notebooks.jl"
+	"~/.julia/dev/ROSTuringPluto/notebooks/Maintenance/Notebook-to-reset-ROSTuringPluto-jl-notebooks.jl"
 ];
 
 # ╔═╡ 0f10a758-e442-4cd8-88bc-d82d8de97ede
-notebooks_df = DataFrame(
-    file = notebook_files,
-    reset = repeat([false], length(notebook_files)),
-	done = repeat([false], length(notebook_files))
-)
+begin
+    files = AbstractString[]
+    for i in 1:length(notebook_files)
+        append!(files, [split(notebook_files[i], "/")[end]])
+    end
+    notebooks_df = DataFrame(
+        name = files,
+        reset = repeat([false], length(notebook_files)),
+        done = repeat([false], length(notebook_files)),
+        file = notebook_files,
+    )
+end
 
 # ╔═╡ a4207232-61eb-4da7-8629-1bcc670ab524
 notebooks_df.reset .= true;
